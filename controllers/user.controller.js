@@ -290,6 +290,7 @@ exports.create = (upload,multer) =>{
             }
             let userData = Object.assign({}, req.body)
             let password = userData.name.slice(0,4).concat(Math.random().toString(36).slice(2))
+            console.log("password",password)
             userData.password = bcrypt.hashSync(password, salt)
             delete userData.user
             if(image !== '') {
