@@ -28,10 +28,15 @@ let upload = multer({ storage: storage}).fields([
 
   ])
 
+let upload1 = multer({ storage: storage}).single('file')
+
+
 router.get('/get/:id?',jwt.verifyToken, LandAllocateController.get)
 router.post('/create', jwt.verifyToken,LandAllocateController.create(upload, multer))
 router.post('/update/:id',jwt.verifyToken, LandAllocateController.update(upload, multer))
+router.post('/upload_excel',jwt.verifyToken,LandAllocateController.upload_excel(upload1,multer))
 router.delete('/delete/:id?',jwt.verifyToken, LandAllocateController.delete)
+router.delete('/delete_all',jwt.verifyToken, LandAllocateController.delete_all)
 router.get('/filter',jwt.verifyToken, LandAllocateController.filter)
 
 module.exports = router

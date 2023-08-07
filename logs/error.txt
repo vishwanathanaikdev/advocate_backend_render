@@ -565,3 +565,13 @@ Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 
 2023-07-25T05:21:03.979Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
 2023-07-31T07:20:10.231Z : Email:- Error: ENOENT: no such file or directory, open '/Users/krishna/Desktop/krishna/projects/web_applications/fcpl_mysore/fcpl_mysore_backend/views/emails/resetpassword.handlebars'
 2023-07-31T11:29:48.123Z : Email:- Error: ENOENT: no such file or directory, open '/Users/krishna/Desktop/krishna/projects/web_applications/fcpl_mysore/fcpl_mysore_backend/views/emails/resetpassword.handlebars'
+2023-08-07T16:06:49.129Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED ::1:27017
+2023-08-07T16:19:01.311Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED ::1:27017
+2023-08-07T16:57:44.807Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED ::1:27017
+2023-08-07T17:03:14.170Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED ::1:27017
+2023-08-07T17:04:16.195Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED ::1:27017
+2023-08-07T17:56:02.732Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED ::1:27017
+2023-08-07T17:57:10.846Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED ::1:27017
+2023-08-07T18:00:41.320Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED ::1:27017
+2023-08-07T18:09:38.466Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED ::1:27017
+2023-08-07T18:14:40.259Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED ::1:27017

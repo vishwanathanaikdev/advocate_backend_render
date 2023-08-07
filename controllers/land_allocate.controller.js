@@ -253,6 +253,13 @@ exports.delete = async (req,res)=>{
     })
 }
 
+exports.delete_all = async (req,res)=>{
+    return await LandAllocate.deleteMany({},(err,data)=>{
+        err && res.status(403).send({status:false,err:err})
+        data && res.status(200).send({status:true,data:'Deleted Successfully'})
+    })
+}
+
 exports.filter = async (req,res)=>{
     const {search,page,from_date,to_date} = req.query 
 
@@ -317,3 +324,95 @@ exports.filter = async (req,res)=>{
 }
 
 
+exports.upload_excel =  (upload,multer) =>{
+    return (req, res) => {
+        upload(req, res, async (err) => {
+            if (err instanceof multer.MulterError || err) {
+                return res.status(500).json({'status': false, 'errors': err});
+            }
+            else if(req.fileValidationError) {
+                return res.status(422).json({'status': false, 'errors': req.fileValidationError})
+            }
+            
+            let headers = [
+                'Name', 
+                'Mobile', 
+                'Email', 
+                'Address', 
+                'Site No', 
+                'Site Info', 
+                'Stage', 
+                'Village', 
+                'Survey No', 
+                'Category', 
+                'Extent', 
+                'Katha', 
+                'Registration Date', 
+                'Comments',
+                'Purchased',
+                'Purchased From',
+            ]
+
+
+            // console.log("req.file  amma",req.file)
+            let read = excelReader.readExcel(req.file, headers)
+
+            if (read) {
+                if('status' in read && !read.status) {
+                    return res.status(422).json(read) 
+                }
+                // let userDepartment = await User.findOne({_id: user.id}).exec()
+                let errors = []
+                for (const item of read) {
+                   
+                    try {
+                        createData = {
+                            name:item['Name'],
+                            mobile:item['Mobile'],
+                            email:(item['Email'] !== '' && item['Email'] !== undefined) ? item['Email'] : '',
+                            address:(item['Address'] !== '' && item['Address'] !== undefined) ? item['Address'] : '',
+                            aadhar_no:'',
+                            pan_no:'',
+                            photo:'',
+                            aadhar_file:'',
+                            pan_file:'',
+                            dl_file:'',
+                            site_no:item['Site No'],
+                            site_info:item['Site Info'],
+                            muda_docs:'',
+                            stage:(item['Stage'] !== '' && item['Stage'] !== undefined) ? item['Stage'] : '',
+                            village:(item['Village'] !== '' && item['Village'] !== undefined) ? item['Village'] : '',
+                            survey_no:(item['Survey No'] !== '' && item['Survey No'] !== undefined) ? item['Survey No'] : '',
+                            category:(item['Category'] !== '' && item['Category'] !== undefined) ? item['Category'] : '',
+                            extent:(item['Extent'] !== '' && item['Extent'] !== undefined) ? item['Extent'] : '',
+                            katha:(item['Katha'] !== '' && item['Katha'] !== undefined) ? item['Katha'] : '',
+                            registration_date:(item['Registration Date'] !== '' && item['Registration Date'] !== undefined) ? item['Registration Date'] : '',
+                            created_by:req.body.user.id,
+                            secondary_name:'',
+                            secondary_contact:'',
+                            comments:item['Comments'] + ' Purchased : ' + item['Purchased'] + + ' Purchased From : ' + item['Purchased From'],
+                            sales_deed:'',
+                            noc:'',
+                            voter_id:'',
+                            ration_card:''
+                        }
+
+                        // console.log("createData",createData)
+                        
+                        
+                            let data1 = await LandAllocate.create(createData)                      
+                    } catch (err) {
+                        errors.push({
+                            not_created: {...createData},
+                            errors: errFormatter.formatError(err.message)
+                        })
+                    }
+                }
+                     errors.length ? res.status(500).json({'status': true, 'msg': errors}) :
+                    res.status(201).json({'status': true, 'msg': 'Successfully added'})
+            } else {
+                res.status(422).json({'status': false, 'errors': 'Please select a file'})
+            }
+        })     
+    }   
+}
