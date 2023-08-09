@@ -1,10 +1,8 @@
 const router = require('express').Router()
 const landAllocateAttachmentController = require('../controllers/land_allocate_attachment.controller')
 const jwt = require('../middlewares/jwt')
-const isRole = require('../middlewares/is_role')
 const multer = require('multer')
 const path = require('path')
-const imageValidation = require('../helpers/upload.helper')
 
 
 
@@ -21,9 +19,9 @@ const storage = multer.diskStorage({
 let upload = multer({ storage: storage,}).single('file')
 
 
-router.get('/get/:id?', landAllocateAttachmentController.get)
-router.post('/create', landAllocateAttachmentController.create(upload, multer))
-router.put('/update/:id', landAllocateAttachmentController.update(upload, multer))
-router.delete('/delete/:id', landAllocateAttachmentController.delete)
+router.get('/get/:id?',jwt.verifyToken, landAllocateAttachmentController.get)
+router.post('/create',jwt.verifyToken, landAllocateAttachmentController.create(upload, multer))
+router.put('/update/:id',jwt.verifyToken, landAllocateAttachmentController.update(upload, multer))
+router.delete('/delete/:id',jwt.verifyToken, landAllocateAttachmentController.delete)
 
 module.exports = router
