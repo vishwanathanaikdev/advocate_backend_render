@@ -1,4 +1,5 @@
 const LandAllocate = require("../models/land_allocate")
+const LandAllocateAttachment = require("../models/land_allocate_attachment")
 const ObjectId = require('mongoose').Types.ObjectId
 const moment = require("moment")
 
@@ -25,7 +26,7 @@ exports.create = (upload,multer)=>{
                 return res.status(422).json({'status': false,'errors': err})
             }
             else {
-                // console.log('req.files',req.files.addhar_file)
+                console.log('req.files',req.files)
                 
                 if(req.files.photo !== undefined) {
                     photo = req.files.photo[0].path.includes("public\\")?req.files.photo[0].path.split('public\\')[1].replace(/\\/gi,'/'):req.files.photo[0].path.split('public/')[1]
@@ -93,7 +94,18 @@ exports.create = (upload,multer)=>{
                 await LandAllocate.create(body,(err,data)=>{
                       console.log("err",err)
                       err && res.status(403).send({status:false,err:err})
-                      data && res.status(201).send({status:true,data:'Created Successfully'})
+
+                      if(data){
+                         if(req.files !== undefined && req.files.files !== undefined  && req.files.files.length > 0){
+                            let other_files = req.files.files
+                            other_files.forEach((d)=>{
+                                LandAllocateAttachment.create({land_allocated:data._id,name:d.originalname,file:d.path.includes("public\\")?d.path.split('public\\')[1].replace(/\\/gi,'/'):d.path.split('public/')[1]},(err,data)=>{})
+                            })
+                            res.status(201).send({status:true,data:'Created Successfully'})
+                         }else{
+                            res.status(201).send({status:true,data:'Created Successfully'})
+                         }
+                      }
                 })
         }
         
@@ -239,7 +251,18 @@ exports.update = (upload,multer)=>{
 
              await LandAllocate.findByIdAndUpdate(req.params.id,body,(err,data)=>{
                    err && res.status(403).send({status:false,err:err})
-                   data && res.status(201).send({status:true,data:'Updated Successfully'})
+                   if(data){
+                    if(req.files !== undefined && req.files.files !== undefined && req.files.files.length > 0){
+                       let other_files = req.files.files
+                       other_files.forEach((d)=>{
+                           LandAllocateAttachment.create({land_allocated:data._id,name:d.originalname,file:d.path.includes("public\\")?d.path.split('public\\')[1].replace(/\\/gi,'/'):d.path.split('public/')[1]},(err,data)=>{})
+                       })
+                       res.status(201).send({status:true,data:'Updated Successfully'})
+                    }else{
+                       res.status(201).send({status:true,data:'Updated Successfully'})
+                    }
+                 }
+
              }).clone()
      }
      })    
@@ -322,7 +345,6 @@ exports.filter = async (req,res)=>{
         data && res.status(200).send({status:true,datas:data,pagination:{total,totalPages,limit}})
     })
 }
-
 
 exports.upload_excel =  (upload,multer) =>{
     return (req, res) => {

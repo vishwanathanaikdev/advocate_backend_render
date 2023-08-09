@@ -34,7 +34,6 @@ exports.verifyToken = (req, res, next) => {
                         delete user_Data.dob
                         delete user_Data.doj
                         req.body.user = user_Data
-                        console.log("req.body",req.body)
 
                         next()
                     }

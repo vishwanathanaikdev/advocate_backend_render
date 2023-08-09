@@ -25,7 +25,7 @@ let upload = multer({ storage: storage}).fields([
     {name:"noc",maxCount:1},
     {name:"voter_id",maxCount:1},
     {name:"ration_card",maxCount:1},
-
+    {name:"files",maxCount:10}
   ])
 
 let upload1 = multer({ storage: storage}).single('file')

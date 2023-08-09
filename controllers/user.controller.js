@@ -728,7 +728,7 @@ exports.userLogOut = (req, res) => {
 exports.assignRoles = async (req, res) => {
     let rolesData = []
 
-    console.log("req.body",req.body)
+    // console.log("req.body",req.body)
     req.body.roles.forEach(item=>{
         rolesData.push({user_id: req.body.user_id, role_id: item})
     })

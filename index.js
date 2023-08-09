@@ -12,7 +12,7 @@ const user = require('./routes/user.router')
 const usercalls = require('./routes/user_calls.router')
 const landallocate = require('./routes/land_allocate.router')
 const homeData = require('./routes/home_data.router')
-
+const land_allocate_attachment = require('./routes/land_allocate_attachment.router')
 
 
 const app = express()
@@ -30,6 +30,7 @@ app.use('/api/designation', designation)
 app.use('/api/department', department)
 app.use('/api/user', user)
 app.use('/api/land_allocate', landallocate)
+app.use('/api/land_allocate_attachment', land_allocate_attachment)
 app.use('/api/user_calls', usercalls)
 app.use('/api/home_data', homeData)
 

@@ -90,7 +90,13 @@ const landAllocateSchema = new mongoose.Schema({
     },
     ration_card:{
         type:String
-    }
+    },
+    purchased_from:{
+        type:String
+    },
+    date_of_contact:{
+        type:String
+    },
 },{
     timestamps: true
 })
