@@ -428,8 +428,8 @@ exports.upload_excel =  (upload,multer) =>{
                 'Katha', 
                 'Registration Date', 
                 'Comments',
-                'Purchased',
-                'Purchased From',
+                'Phase'
+
             ]
 
             // console.log("req.body kp ",req.body.user)
@@ -444,7 +444,6 @@ exports.upload_excel =  (upload,multer) =>{
                 // let userDepartment = await User.findOne({_id: user.id}).exec()
                 let errors = []
                 for (const item of read) {
-                    console.log("item",item['Registration Date'])
                    let createData
                     try {
                         createData = {
@@ -468,6 +467,7 @@ exports.upload_excel =  (upload,multer) =>{
                             extent:(item['Extent'] !== '' && item['Extent'] !== undefined) ? item['Extent'] : '',
                             katha:(item['Katha'] !== '' && item['Katha'] !== undefined) ? item['Katha'] : false,
                             registration_date:(item['Registration Date'] !== '' && item['Registration Date'] !== undefined) ? new Date(item['Registration Date']) : '',
+                            document_lost_phase:(item['Phase'] !== '' && item['Phase'] !== undefined) ? new Date(item['Phase']) : '',
                             created_by:user.id,
                             secondary_name:'',
                             secondary_contact:'',
