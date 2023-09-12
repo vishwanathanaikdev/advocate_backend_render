@@ -97,6 +97,22 @@ const landAllocateSchema = new mongoose.Schema({
     date_of_contact:{
         type:String
     },
+    live_status:{
+        type:Boolean,
+        default:false
+    },
+    document_lost_phase:{
+        type:String
+    },
+    death_certificate:{
+        type:String
+    },
+    family_tree:{
+        type:String
+    },
+    andiment:{
+        type:String
+    }
 },{
     timestamps: true
 })

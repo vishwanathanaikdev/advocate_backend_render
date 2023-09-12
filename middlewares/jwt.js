@@ -22,6 +22,8 @@ exports.verifyToken = (req, res, next) => {
 
                     if(data.access_token === token) {
                         let user_Data = {...decoded}
+
+                        console.log("user_Data",user_Data)
                         delete user_Data.phone
                         delete user_Data.email
                         delete user_Data.image
@@ -33,6 +35,8 @@ exports.verifyToken = (req, res, next) => {
                         delete user_Data.designation_id
                         delete user_Data.dob
                         delete user_Data.doj
+                        console.log("user_Data 1",user_Data)
+
                         req.body.user = user_Data
 
                         next()

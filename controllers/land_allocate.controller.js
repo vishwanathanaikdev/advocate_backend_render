@@ -1,4 +1,6 @@
 const LandAllocate = require("../models/land_allocate")
+const excelReader = require('../helpers/excel_reader')
+const errFormatter = require('../helpers/error.formatter')
 const LandAllocateAttachment = require("../models/land_allocate_attachment")
 const ObjectId = require('mongoose').Types.ObjectId
 const moment = require("moment")
@@ -15,6 +17,9 @@ exports.create = (upload,multer)=>{
         let sales_deed;
         let voter_id;
         let ration_card;
+        let death_certificate;
+        let family_tree;
+        let andiment;
         return (req,res)=>{
         let user_id = req.body.user.id
         upload(req,res, async(err)=>{
@@ -26,7 +31,6 @@ exports.create = (upload,multer)=>{
                 return res.status(422).json({'status': false,'errors': err})
             }
             else {
-                console.log('req.files',req.files)
                 
                 if(req.files.photo !== undefined) {
                     photo = req.files.photo[0].path.includes("public\\")?req.files.photo[0].path.split('public\\')[1].replace(/\\/gi,'/'):req.files.photo[0].path.split('public/')[1]
@@ -58,6 +62,18 @@ exports.create = (upload,multer)=>{
                 if(req.files.ration_card !== undefined) {
                     ration_card = req.files.ration_card[0].path.includes("public\\")?req.files.ration_card[0].path.split('public\\')[1].replace(/\\/gi,'/'):req.files.ration_card[0].path.split('public/')[1]
                 }
+
+                if(req.files.death_certificate !== undefined) {
+                    death_certificate = req.files.death_certificate[0].path.includes("public\\")?req.files.death_certificate[0].path.split('public\\')[1].replace(/\\/gi,'/'):req.files.death_certificate[0].path.split('public/')[1]
+                }
+
+                if(req.files.family_tree !== undefined) {
+                    family_tree = req.files.family_tree[0].path.includes("public\\")?req.files.family_tree[0].path.split('public\\')[1].replace(/\\/gi,'/'):req.files.family_tree[0].path.split('public/')[1]
+                }
+
+                if(req.files.andiment !== undefined) {
+                    andiment = req.files.andiment[0].path.includes("public\\")?req.files.andiment[0].path.split('public\\')[1].replace(/\\/gi,'/'):req.files.andiment[0].path.split('public/')[1]
+                }
                
 
                 var body =  Object.assign(req.body)
@@ -87,8 +103,21 @@ exports.create = (upload,multer)=>{
                 if(voter_id !== undefined){
                     body['voter_id'] = `${voter_id}`
                 }
+
                 if(ration_card !== undefined){
                     body['ration_card'] = `${ration_card}`
+                }
+
+                if(death_certificate !== undefined){
+                    body['death_certificate'] = `${death_certificate}`
+                }
+
+                if(family_tree !== undefined){
+                    body['family_tree'] = `${family_tree}`
+                }
+
+                if(andiment !== undefined){
+                    body['andiment'] = `${andiment}`
                 }
 
                 await LandAllocate.create(body,(err,data)=>{
@@ -174,6 +203,9 @@ exports.update = (upload,multer)=>{
      let sales_deed;
      let voter_id;
      let ration_card;
+     let death_certificate;
+     let family_tree;
+     let andiment;
      return (req,res)=>{
      upload(req,res, async(err)=>{
          if (req.fileValidationError) {
@@ -217,6 +249,20 @@ exports.update = (upload,multer)=>{
             if(req.files.ration_card !== undefined) {
                 ration_card = req.files.ration_card[0].path.includes("public\\")?req.files.ration_card[0].path.split('public\\')[1].replace(/\\/gi,'/'):req.files.ration_card[0].path.split('public/')[1]
             }
+
+            if(req.files.death_certificate !== undefined) {
+                death_certificate = req.files.death_certificate[0].path.includes("public\\")?req.files.death_certificate[0].path.split('public\\')[1].replace(/\\/gi,'/'):req.files.death_certificate[0].path.split('public/')[1]
+            }
+
+            if(req.files.family_tree !== undefined) {
+                family_tree = req.files.family_tree[0].path.includes("public\\")?req.files.family_tree[0].path.split('public\\')[1].replace(/\\/gi,'/'):req.files.family_tree[0].path.split('public/')[1]
+            }
+
+            if(req.files.andiment !== undefined) {
+                andiment = req.files.andiment[0].path.includes("public\\")?req.files.andiment[0].path.split('public\\')[1].replace(/\\/gi,'/'):req.files.andiment[0].path.split('public/')[1]
+            }
+
+            
             
 
              var body =  Object.assign(req.body)
@@ -248,6 +294,15 @@ exports.update = (upload,multer)=>{
             if(ration_card !== undefined){
                 body['ration_card'] = `${ration_card}`
             }
+            if(death_certificate !== undefined){
+                body['death_certificate'] = `${death_certificate}`
+            }
+            if(family_tree !== undefined){
+                body['family_tree'] = `${family_tree}`
+            }
+            if(andiment !== undefined){
+                body['andiment'] = `${andiment}`
+            }
 
              await LandAllocate.findByIdAndUpdate(req.params.id,body,(err,data)=>{
                    err && res.status(403).send({status:false,err:err})
@@ -273,14 +328,14 @@ exports.delete = async (req,res)=>{
     return await LandAllocate.findByIdAndDelete(req.params.id,(err,data)=>{
         err && res.status(403).send({status:false,err:err})
         data && res.status(200).send({status:true,data:'Deleted Successfully'})
-    })
+    }).clone()
 }
 
 exports.delete_all = async (req,res)=>{
     return await LandAllocate.deleteMany({},(err,data)=>{
         err && res.status(403).send({status:false,err:err})
         data && res.status(200).send({status:true,data:'Deleted Successfully'})
-    })
+    }).clone()
 }
 
 exports.filter = async (req,res)=>{
@@ -348,6 +403,8 @@ exports.filter = async (req,res)=>{
 
 exports.upload_excel =  (upload,multer) =>{
     return (req, res) => {
+        let user = req.body.user
+
         upload(req, res, async (err) => {
             if (err instanceof multer.MulterError || err) {
                 return res.status(500).json({'status': false, 'errors': err});
@@ -375,8 +432,9 @@ exports.upload_excel =  (upload,multer) =>{
                 'Purchased From',
             ]
 
+            // console.log("req.body kp ",req.body.user)
 
-            // console.log("req.file  amma",req.file)
+
             let read = excelReader.readExcel(req.file, headers)
 
             if (read) {
@@ -386,7 +444,8 @@ exports.upload_excel =  (upload,multer) =>{
                 // let userDepartment = await User.findOne({_id: user.id}).exec()
                 let errors = []
                 for (const item of read) {
-                   
+                    console.log("item",item['Registration Date'])
+                   let createData
                     try {
                         createData = {
                             name:item['Name'],
@@ -407,12 +466,12 @@ exports.upload_excel =  (upload,multer) =>{
                             survey_no:(item['Survey No'] !== '' && item['Survey No'] !== undefined) ? item['Survey No'] : '',
                             category:(item['Category'] !== '' && item['Category'] !== undefined) ? item['Category'] : '',
                             extent:(item['Extent'] !== '' && item['Extent'] !== undefined) ? item['Extent'] : '',
-                            katha:(item['Katha'] !== '' && item['Katha'] !== undefined) ? item['Katha'] : '',
-                            registration_date:(item['Registration Date'] !== '' && item['Registration Date'] !== undefined) ? item['Registration Date'] : '',
-                            created_by:req.body.user.id,
+                            katha:(item['Katha'] !== '' && item['Katha'] !== undefined) ? item['Katha'] : false,
+                            registration_date:(item['Registration Date'] !== '' && item['Registration Date'] !== undefined) ? new Date(item['Registration Date']) : '',
+                            created_by:user.id,
                             secondary_name:'',
                             secondary_contact:'',
-                            comments:item['Comments'] + ' Purchased : ' + item['Purchased'] + + ' Purchased From : ' + item['Purchased From'],
+                            comments:item['Comments'] ,
                             sales_deed:'',
                             noc:'',
                             voter_id:'',
@@ -433,7 +492,7 @@ exports.upload_excel =  (upload,multer) =>{
                      errors.length ? res.status(500).json({'status': true, 'msg': errors}) :
                     res.status(201).json({'status': true, 'msg': 'Successfully added'})
             } else {
-                res.status(422).json({'status': false, 'errors': 'Please select a file'})
+                res.status(422).json(read)
             }
         })     
     }   

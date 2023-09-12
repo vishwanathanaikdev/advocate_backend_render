@@ -25,6 +25,9 @@ let upload = multer({ storage: storage}).fields([
     {name:"noc",maxCount:1},
     {name:"voter_id",maxCount:1},
     {name:"ration_card",maxCount:1},
+    {name:"death_certificate",maxCount:1},
+    {name:"family_tree",maxCount:1},
+    {name:"andiment",maxCount:1},
     {name:"files",maxCount:10}
   ])
 
@@ -34,7 +37,7 @@ let upload1 = multer({ storage: storage}).single('file')
 router.get('/get/:id?',jwt.verifyToken, LandAllocateController.get)
 router.post('/create', jwt.verifyToken,LandAllocateController.create(upload, multer))
 router.post('/update/:id',jwt.verifyToken, LandAllocateController.update(upload, multer))
-router.post('/upload_excel',jwt.verifyToken,LandAllocateController.upload_excel(upload1,multer))
+router.post('/upload_excel',[jwt.verifyToken],LandAllocateController.upload_excel(upload1,multer))
 router.delete('/delete/:id?',jwt.verifyToken, LandAllocateController.delete)
 router.delete('/delete_all',jwt.verifyToken, LandAllocateController.delete_all)
 router.get('/filter',jwt.verifyToken, LandAllocateController.filter)
