@@ -467,7 +467,7 @@ exports.upload_excel =  (upload,multer) =>{
                             extent:(item['Extent'] !== '' && item['Extent'] !== undefined) ? item['Extent'] : '',
                             katha:(item['Katha'] !== '' && item['Katha'] !== undefined) ? item['Katha'] : false,
                             registration_date:(item['Registration Date'] !== '' && item['Registration Date'] !== undefined) ? new Date(item['Registration Date']) : '',
-                            document_lost_phase:(item['Phase'] !== '' && item['Phase'] !== undefined) ? new Date(item['Phase']) : '',
+                            document_lost_phase:(item['Phase'] !== '' && item['Phase'] !== undefined) ? item['Phase'] : '',
                             created_by:user.id,
                             secondary_name:'',
                             secondary_contact:'',
