@@ -109,118 +109,84 @@ exports.get = async (req, res) => {
 
 exports.filter = async (req, res) => {
     const {search, page} = req.query
+
     let params = {}, limit = 25, skip = (page - 1) * limit, total = 0, totalPages = 0
     if(search) {
         params = {
             $or: [
                 { name: { $regex: search, '$options': 'i' } },
-                { employee_id: { $regex: search, '$options': 'i' } },
+                // { employee_id: { $regex: search, '$options': 'i' } },
                 { official_email: { $regex: search, '$options': 'i' } }
             ]
         }
+    }
+
+
         let userCount = await User.aggregate([
             {$match: {...params}},
-            {
-                $lookup: {
-                    from: 'departments',
-                    localField: 'department_id',
-                    foreignField: '_id',
-                    as: 'department_id'
-                }
-            },
-            {
-                $lookup: {
-                    from: 'designations',
-                    localField: 'designation_id',
-                    foreignField: '_id',
-                    as: 'designation_id'
-                }
-            },
-            {
-                $lookup: {
-                    from: 'user_roles',
-                    localField: '_id',
-                    foreignField: 'user_id',
-                    as: 'user_roles',
-                    pipeline: [
-                        {
-                            $lookup: {
-                                from: 'roles',
-                                localField: 'role_id',
-                                foreignField: '_id',
-                                as: 'roles'
-                            }
-                        },
-                        {
-                            $unwind:{
-                                path:'$roles',
-                                preserveNullAndEmptyArrays:true
-                            } 
-                        }
-                    ]
-                }
-            },
-
-            // {
-            //     $unwind:{
-            //         path:'$user_roles.roles',
-            //         preserveNullAndEmptyArrays:true
-            //     }
-            // },
-
-            
+          
             {
                 $count: "count"
             }
         ])
         total = userCount.length && userCount[0].count
-    }
+
+    
+        if(!page || page == 1){
+            skip = 0
+        }else{
+            skip = parseInt(page) - 1  * limit
+        }
+
+
     User.aggregate([
         {$match: {...params}},
-        {
-            $lookup: {
-                from: 'departments',
-                localField: 'department_id',
-                foreignField: '_id',
-                as: 'department_id'
-            }
-        },
-        {
-            $lookup: {
-                from: 'designations',
-                localField: 'designation_id',
-                foreignField: '_id',
-                as: 'designation_id'
-            }
-        },
-        {
-            $lookup: {
-                from: 'user_roles',
-                localField: '_id',
-                foreignField: 'user_id',
-                as: 'user_roles',
-                pipeline: [
-                    {
-                        $lookup: {
-                            from: 'roles',
-                            localField: 'role_id',
-                            foreignField: '_id',
-                            as: 'roles'
-                        }
-                    },
-                    {
-                        $unwind:{
-                            path:'$roles',
-                            preserveNullAndEmptyArrays:true
-                        } 
-                    }
-                ]
-            }
-        }
+        // {
+        //     $lookup: {
+        //         from: 'departments',
+        //         localField: 'department_id',
+        //         foreignField: '_id',
+        //         as: 'department_id'
+        //     }
+        // },
+        // {
+        //     $lookup: {
+        //         from: 'designations',
+        //         localField: 'designation_id',
+        //         foreignField: '_id',
+        //         as: 'designation_id'
+        //     }
+        // },
+        // {
+        //     $lookup: {
+        //         from: 'user_roles',
+        //         localField: '_id',
+        //         foreignField: 'user_id',
+        //         as: 'user_roles',
+        //         pipeline: [
+        //             {
+        //                 $lookup: {
+        //                     from: 'roles',
+        //                     localField: 'role_id',
+        //                     foreignField: '_id',
+        //                     as: 'roles'
+        //                 }
+        //             },
+        //             {
+        //                 $unwind:{
+        //                     path:'$roles',
+        //                     preserveNullAndEmptyArrays:true
+        //                 } 
+        //             }
+        //         ]
+        //     }
+        // }
     ])
     .skip(skip)
     .limit(limit)
     .exec((err, datas)=>{
+        console.log("err",err)
+        console.log("datas",datas)
         if(err) return res.status(500).json({'status': false, 'errors': err})
         res.status(200).json({'status': true, 'pagination': {total, limit, totalPages}, 'datas': datas})
     })
@@ -290,7 +256,6 @@ exports.create = (upload,multer) =>{
             }
             let userData = Object.assign({}, req.body)
             let password = userData.name.slice(0,4).concat(Math.random().toString(36).slice(2))
-            console.log("password",password)
             userData.password = bcrypt.hashSync(password, salt)
             delete userData.user
             if(image !== '') {
@@ -416,7 +381,7 @@ exports.update = (upload, multer) => {
     return (req, res)=>{
         let image = ''
         upload(req, res, (err)=>{
-            console.log("req.file",req.file)
+            // console.log("req.file",req.file)
             if(req.file) {
                 if (req.fileValidationError) {
                     return res.status(422).json({'status': false, 'errors': req.fileValidationError})
@@ -456,7 +421,7 @@ exports.update = (upload, multer) => {
                         userData.password = bcrypt.hashSync(req.body.password, salt)
                     }
                     rolesData = []
-                    console.log("userData",userData)
+                    // console.log("userData",userData)
                     User.findOneAndUpdate({_id: req.params.id}, userData, { runValidators: true, context: 'query', new: true }, (err, updatedData)=>{
                         if(err) return res.status(422).json({'status': false, 'errors': errFormatter.formatError(err.message)})
                         if(image !== '') {
@@ -637,7 +602,7 @@ exports.changePassword = async (req, res) => {
 }
 
 exports.userLogin = (req, res) => {
-    console.log("req.body",req.body)
+    // console.log("req.body",req.body)
     User.findOne({
         $and: [
                 {$or: [{employee_id: req.body.user_id}, {official_email: req.body.user_id}]}, 
@@ -647,7 +612,7 @@ exports.userLogin = (req, res) => {
        
     }) .populate(['department_id', 'designation_id']).exec((err, data)=>{
 
-        console.log('err',err,'data',data)
+        // console.log('err',err,'data',data)
         if(err) {
             res.status(500).json({'status': false, 'errors': err.errors})
         }
@@ -756,7 +721,7 @@ exports.changepassword_admin = async (req,res) => {
     let password =  bcrypt.hashSync(req.body.password, salt)
     req.body.password = password
 
-    console.log('req.body',req.body)
+    // console.log('req.body',req.body)
     return await User.findOneAndUpdate({_id:req.body.user_id},req.body,{new:true},(err,data)=>{
         err && res.status(422).send({status:false,err:err})
         data && res.status(200).send({status:true,message:'Password Updated Successfully'})
@@ -924,7 +889,7 @@ exports.getUserOperatorBasedFilter = async(req,res)=>{
 }
 
 exports.deleteEmployeeOnboarded = async(req,res)=>{
-    console.log('req . params .id',req.params.id)
+    // console.log('req . params .id',req.params.id)
     return User.findByIdAndDelete(req.params.id,(err,data)=>{
         err && res.status(403).send({status:false,err:err})
         data && res.status(200).send({status:true,data:data})

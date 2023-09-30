@@ -5,6 +5,7 @@ const connectDB = require('./config/database')
 const bodyParser = require('body-parser')
 
 
+const attendance = require('./routes/attendance.router')
 const role = require('./routes/role.router')
 const designation = require('./routes/designation.router')
 const department = require('./routes/department.router')
@@ -25,6 +26,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(express.static(__dirname + '/public'))
 
+app.use('/api/attendance', attendance)
 app.use('/api/role', role)
 app.use('/api/designation', designation)
 app.use('/api/department', department)
