@@ -42,6 +42,20 @@ exports.get = async (req, res)=>{
     return await UserCalls.aggregate([
         {$match:params},
         {
+            $lookup:{
+                from:'users',
+                localField:'created_by',
+                foreignField:'_id',
+                as:'created_by'
+            }
+        },
+        {
+            $unwind:{
+                path:'$created_by',
+                preserveNullAndEmptyArrays:true
+            }
+        },
+        {
             $skip:skip
         },{
             $limit:limit
@@ -120,8 +134,22 @@ exports.filter = async (req, res)=>{
 
     
 
-    return await UserCalls.aggregate([
+    return  UserCalls.aggregate([
         {$match:params},
+        {
+            $lookup:{
+                from:'users',
+                localField:'created_by',
+                foreignField:'_id',
+                as:'created_by'
+            }
+        },
+        {
+            $unwind:{
+                path:'$created_by',
+                preserveNullAndEmptyArrays:true
+            }
+        },
         {
             $skip:skip
         },{
