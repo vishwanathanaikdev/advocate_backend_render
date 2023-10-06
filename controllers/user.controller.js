@@ -237,7 +237,6 @@ exports.profile = async (req, res) => {
     })
 }
 
-
 exports.create = (upload,multer) =>{
 
     return (req, res)=>{
@@ -728,7 +727,6 @@ exports.changepassword_admin = async (req,res) => {
     }).clone()
 }
 
-
 exports.update_application = async (req,res) =>{
     let password = req.body.name.slice(0,4).concat(Math.random().toString(36).slice(2))
     req.body.password = bcrypt.hashSync(password, salt)
@@ -794,7 +792,6 @@ exports.reshareCredentials = async (req,res) =>{
         }
     }).clone()
 }
-
 
 exports.resetPassword1 = async (req,res)=>{
     // console.log('request recieved',req.body)
