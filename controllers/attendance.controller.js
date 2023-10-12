@@ -111,8 +111,8 @@ exports.downLoadExcel = async (req, res)=>{
     }
     
     if (from_date && to_date) {
-        let from = new Date(from_date).toISOString()?.slice(0,10) + "T00:00:00.000+00:00"
-        let to = new Date(moment(to_date).add(1, 'd')).toISOString()?.slice(0,10) + "T23:59:59.000+00:00"
+        let from = new Date(from_date).toISOString().slice(0,10) + "T00:00:00.000+00:00"
+        let to = new Date(moment(to_date).add(1, 'd')).toISOString().slice(0,10) + "T23:59:59.000+00:00"
         params = { ...params, ...{ createdAt: { $gte: new Date(from), $lt: new Date(moment(to).add(1, 'd')) } } }
     }
 
@@ -181,7 +181,7 @@ exports.downLoadExcel = async (req, res)=>{
         });
 
         try {
-            const data = await workbook.xlsx.writeFile(`${path}/users.xlsx`)
+            const data = await workbook.xlsx.writeFile(`${path}/user_attendance.xlsx`)
              .then(() => {
                res.send({
                  status: "success",
