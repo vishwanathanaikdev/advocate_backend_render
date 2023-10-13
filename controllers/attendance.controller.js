@@ -14,7 +14,7 @@ exports.get = (req, res)=>{
 exports.get_today = (req, res)=>{
     const today = JSON.stringify(new Date(moment())).slice(1,11)+"T00:00:00.000+00:00";
     const tommorrow = JSON.stringify((new Date(moment().add(1, 'd')))).slice(1,11)+"T23:59:59.000+00:00";
-    Attendance.find({ createdAt: { $gte: new Date(today).toISOString(), $lt: new Date(tommorrow).toISOString() }}, (err, datas)=>{
+    Attendance.find({ createdAt: { $gte: new Date(today).toISOString(), $lt: new Date(tommorrow).toISOString() },user_id:req.body.user.id}, (err, datas)=>{
         err ? res.status(500).json({'status': false, 'errors': err}):
         res.status(200).json({'status': true, 'datas': datas})
     })
