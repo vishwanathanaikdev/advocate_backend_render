@@ -1,7 +1,11 @@
 const mongoose = require('mongoose')
 
-const caseSchema = new mongoose.Schema({
+const opinionFileSchema = new mongoose.Schema({
     created_by: {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User'
+    },
+    allocation_of_work:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
     },
@@ -13,37 +17,17 @@ const caseSchema = new mongoose.Schema({
         type:String,
         default:''
     },
-    case_no:{
+    property_details:{
         type:String,
         default:''
     },
-    parties_name:{
-        type:String,
-        default:''
-    },
-    advocate_for:{
-        type:String,
-        default:''
-    },
-    court_hall:{
-        type:String,
-        default:''
-    },
-    floor:{
+    work_details:{
         type:String,
         default:''
     },
     file:{
         type:String,
         default:''
-    },
-    stage:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'CaseStage'
-    },
-    case_type:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'CaseType'
     },
     comments:{
         type:String,
@@ -58,4 +42,4 @@ const caseSchema = new mongoose.Schema({
     timestamps: true
 })
 
-module.exports = mongoose.model('CaseSchema', caseSchema)
+module.exports = mongoose.model('OpinionFileSchema', opinionFileSchema)

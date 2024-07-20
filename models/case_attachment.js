@@ -1,6 +1,10 @@
 const mongoose = require('mongoose')
 
 const caseAttachmentSchema = new mongoose.Schema({
+    created_by:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User'
+    },
     case:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'CaseSchema'

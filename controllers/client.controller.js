@@ -70,13 +70,17 @@ exports.create = (upload,multer)=>{
 }
 
 exports.get = async(req,res)=>{
-    let {page} = req.query
+    let {page,type} = req.query
     let {id} = req.params
     let params = {},skip=0,limit=25,total=0,totalPages=0;
 
     if(id !== '' && id !== 'null' && id !== null && id !== undefined){
         if(ObjectId.isValid(id)){
             params = {_id:ObjectId(id)}
+        }
+    }else{
+        if(type !== undefined && type !== null && type !== ''){
+            params={is_active:type === 'in_active' ? false : true}
         }
     }
 
@@ -197,6 +201,7 @@ exports.delete_all = async (req,res)=>{
 
 exports.filter = async (req,res)=>{
     const {search,page,from_date,to_date,type='active'} = req.query 
+   
 
     let params = {}, skip = 0,  totalPages = 1 , total = 0, limit = 25
     

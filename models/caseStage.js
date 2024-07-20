@@ -5,6 +5,10 @@ const caseStageSchema = new mongoose.Schema({
         type: String,
         unique: true,
     },
+    case_type:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'CaseType'
+    }
     
 },{
     timestamps:true

@@ -3,6 +3,7 @@ const multer = require('multer')
 const path = require('path')
 const caseController = require("../controllers/case.controller")
 const jwt  = require("../middlewares/jwt")
+const { upload_case_docs } = require('../helpers/awsUpload.helper')
 
 
 const storage = multer.diskStorage({
@@ -15,31 +16,18 @@ const storage = multer.diskStorage({
     }
 })
 
-let upload = multer({ storage: storage}).fields([
-    {name:"photo",maxCount:1},
-    {name:"aadhar_file",maxCount:1},
-    {name:"pan_file",maxCount:1},
-    {name:"dl_file",maxCount:1},
-    {name:"muda_file",maxCount:1},
-    {name:"sales_deed",maxCount:1},
-    {name:"noc",maxCount:1},
-    {name:"voter_id",maxCount:1},
-    {name:"ration_card",maxCount:1},
-    {name:"death_certificate",maxCount:1},
-    {name:"family_tree",maxCount:1},
-    {name:"andiment",maxCount:1},
-    {name:"files",maxCount:10}
-  ])
 
 let upload1 = multer({ storage: storage}).single('file')
 
 
 router.get('/get/:id?',jwt.verifyToken, caseController.get)
-router.post('/create', jwt.verifyToken,caseController.create(upload, multer))
-router.post('/update/:id',jwt.verifyToken, caseController.update(upload, multer))
+router.post('/create', jwt.verifyToken,caseController.create)
+router.put('/update/:id',jwt.verifyToken, caseController.update)
 router.post('/upload_excel',[jwt.verifyToken],caseController.upload_excel(upload1,multer))
 router.delete('/delete/:id?',jwt.verifyToken, caseController.delete)
 router.delete('/delete_all',jwt.verifyToken, caseController.delete_all)
 router.get('/filter',jwt.verifyToken, caseController.filter)
+router.post('/upload_file',upload_case_docs.single('file'),caseController.fileUpload)
+router.post('/upload_case_attachment_file',jwt.verifyToken,upload_case_docs.single('file'),caseController.upload_case_attachment_file)
 
 module.exports = router

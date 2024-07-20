@@ -1,8 +1,6 @@
-const CaseSchema = require("../models/case")
+const OpinionFile = require("../models/opinion_file")
 const excelReader = require('../helpers/excel_reader')
 const errFormatter = require('../helpers/error.formatter')
-const CaseAttachment = require("../models/case_attachment")
-const CaseType = require('../models/caseType')
 const ObjectId = require('mongoose').Types.ObjectId
 const moment = require("moment")
 
@@ -11,7 +9,7 @@ const moment = require("moment")
 exports.create = async(req,res)=>{
     let body = {...req.body}
     body['created_by'] = req.body.user.id
-    await CaseSchema.create(req.body,(err,data)=>{
+    await OpinionFile.create(req.body,(err,data)=>{
           err && res.status(403).send({status:false,err:err})
           data && res.status(201).send({status:true,data:'Created Successfully'})
     })
@@ -45,20 +43,10 @@ exports.get = async(req,res)=>{
             params = { ...params, ...{ createdAt: { $gte: new Date(from_date), $lt: new Date(moment(to_date).add(1, 'd')) } } }
         }
 
-        if(type !== ''){
-            const findData = await CaseType.findOne({name:type})
-            if(findData !== '' && findData !== 'null' && findData !== null && findData !== undefined){
-                params = {...params,case_type:findData._id}
-            }
-        }
+        
     }
 
-
-    console.log("params",params)
-
-
-
-    total = await CaseSchema.find(params).count()
+    total = await OpinionFile.find(params).count()
 
     totalPages = Math.ceil(total/limit)
 
@@ -69,47 +57,19 @@ exports.get = async(req,res)=>{
         skip = (page - 1) * limit
     }
 
-    return await CaseSchema.aggregate([
+    return await OpinionFile.aggregate([
         {$match:params},
         {
             $lookup:{
                 from:"users",
-                localField:"created_by",
+                localField:"allocation_of_work",
                 foreignField:"_id",
-                as:"created_by",
+                as:"allocation_of_work",
             }
         },
         {
            $unwind:{
-            path:"$created_by",
-            preserveNullAndEmptyArrays:true
-           }
-        },
-        {
-            $lookup:{
-                from:"casestages",
-                localField:"stage",
-                foreignField:"_id",
-                as:"stage",
-            }
-        },
-        {
-           $unwind:{
-            path:"$stage",
-            preserveNullAndEmptyArrays:true
-           }
-        },
-        {
-            $lookup:{
-                from:"casetypes",
-                localField:"case_type",
-                foreignField:"_id",
-                as:"case_type",
-            }
-        },
-        {
-           $unwind:{
-            path:"$case_type",
+            path:"$allocation_of_work",
             preserveNullAndEmptyArrays:true
            }
         },
@@ -155,21 +115,21 @@ exports.get = async(req,res)=>{
 }
 
 exports.update = async(req,res)=>{
-    await CaseSchema.findByIdAndUpdate(req.params.id,req.body,(err,data)=>{
+    await OpinionFile.findByIdAndUpdate(req.params.id,req.body,(err,data)=>{
         err && res.status(403).send({status:false,err:err})
         data && res.status(200).send({status:true,data:'Updated Successfully'})
   }).clone()
 }
 
 exports.delete = async (req,res)=>{
-    return await CaseSchema.findByIdAndDelete(req.params.id,(err,data)=>{
+    return await OpinionFile.findByIdAndDelete(req.params.id,(err,data)=>{
         err && res.status(403).send({status:false,err:err})
         data && res.status(200).send({status:true,data:'Deleted Successfully'})
     }).clone()
 }
 
 exports.delete_all = async (req,res)=>{
-    return await CaseSchema.deleteMany({},(err,data)=>{
+    return await OpinionFile.deleteMany({},(err,data)=>{
         err && res.status(403).send({status:false,err:err})
         data && res.status(200).send({status:true,data:'Deleted Successfully'})
     }).clone()
@@ -195,14 +155,8 @@ exports.filter = async (req,res)=>{
         params = { ...params, ...{ createdAt: { $gte: new Date(from_date), $lt: new Date(moment(to_date).add(1, 'd')) } } }
     }
 
-    if(type !== ''){
-        const findData = await CaseType.findOne({name:type})
-        if(findData !== '' && findData !== 'null' && findData !== null && findData !== undefined){
-            params = {case_type:findData._id}
-        }
-    }
 
-    total = await CaseSchema.find(params).count()
+    total = await OpinionFile.find(params).count()
     totalPages = Math.ceil(total/limit)
 
 
@@ -215,49 +169,21 @@ exports.filter = async (req,res)=>{
     }
 
 
-    return await CaseSchema.aggregate([
+    return await OpinionFile.aggregate([
         {
             $match:params
         },
         {
             $lookup:{
                 from:"users",
-                localField:"created_by",
+                localField:"allocation_of_work",
                 foreignField:"_id",
-                as:"created_by",
+                as:"allocation_of_work",
             }
         },
         {
            $unwind:{
-            path:"$created_by",
-            preserveNullAndEmptyArrays:true
-           }
-        },
-        {
-            $lookup:{
-                from:"casestages",
-                localField:"stage",
-                foreignField:"_id",
-                as:"stage",
-            }
-        },
-        {
-           $unwind:{
-            path:"$stage",
-            preserveNullAndEmptyArrays:true
-           }
-        },
-        {
-            $lookup:{
-                from:"casetypes",
-                localField:"case_type",
-                foreignField:"_id",
-                as:"case_type",
-            }
-        },
-        {
-           $unwind:{
-            path:"$case_type",
+            path:"$allocation_of_work",
             preserveNullAndEmptyArrays:true
            }
         },
@@ -376,7 +302,7 @@ exports.upload_excel =  (upload,multer) =>{
 
                         
                         
-                            let data1 = await CaseSchema.create(createData)                      
+                            let data1 = await OpinionFile.create(createData)                      
                     } catch (err) {
                         errors.push({
                             not_created: {...createData},
@@ -396,14 +322,3 @@ exports.upload_excel =  (upload,multer) =>{
 exports.fileUpload = (req,res)=>{
     return res.status(200).send({status:true,data:req.file.key})
 } 
-
-
-exports.upload_case_attachment_file = async(req,res)=>{
-    let body = {...req.body}
-    console.log("body",body)
-    body['created_by'] = req.body.user.id
-    await CaseAttachment.create(req.body,(err,data)=>{
-          err && res.status(403).send({status:false,err:err})
-          data && res.status(200).send({status:true,data:'Created Successfully'})
-    })
-}

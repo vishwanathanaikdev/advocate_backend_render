@@ -1,10 +1,24 @@
 const CaseType = require('../models/caseType')
 const errFormatter = require('../helpers/error.formatter')
 
-exports.get = (req, res)=>{
-    CaseType.find({...req.params.id?{_id: req.params.id}:''}, (err, datas)=>{
-        err ? res.status(500).json({'status': false, 'errors': err}):
-        res.status(200).json({'status': true, 'datas': (datas)?datas: 'No datas found'})
+exports.get = async(req, res)=>{
+    const {page=1} = req.query
+
+    let params = {}, limit = 25, skip = (page - 1) * limit, total = 0, totalPages = 0
+
+    total = await CaseType.find(params).count()
+
+    totalPages = Math.ceil(total/limit)
+
+    await CaseType.aggregate([
+        {$match: {...params}},
+        {$sort: { createdAt: -1 }},
+        {$skip:skip},
+        {$limit:limit},
+
+    ]).exec((err,datas)=>{
+        err ? res.status(422).json({'status': false, 'errors':errFormatter.formatError(err.message)}):
+        res.status(200).json({'status':true, 'datas': datas,'pagination':{total,limit,totalPages}})
     })
 }
 
@@ -43,5 +57,40 @@ exports.delete = (req, res)=> {
         else {
             res.status(404).json({'status': false, 'errors': 'CaseType not found'})
         }
+    })
+}
+
+exports.filter = async (req, res) => {
+    const {search, page=1} = req.query
+
+    let params = {}, limit = 25, skip = (page - 1) * limit, total = 0, totalPages = 0
+    if(search) {
+        params = {
+            $or: [
+                { name: { $regex: search, '$options': 'i' } },
+            ]
+        }
+    }
+
+    let dataCount = await CaseType.aggregate([
+        {$match: {...params}},
+        {
+            $count: "count"
+        }
+    ])
+
+    total = dataCount.length && dataCount[0].count
+
+    totalPages = Math.ceil(total/limit)
+
+    await CaseType.aggregate([
+        {$match: {...params}},
+        { $sort: { createdAt: -1 } },
+        {$skip:skip},
+        {$limit:limit},
+
+    ]).exec((err,datas)=>{
+        err ? res.status(422).json({'status': false, 'errors':errFormatter.formatError(err.message)}):
+        res.status(200).json({'status':true, 'datas': datas,'pagination':{total,limit,totalPages}})
     })
 }
