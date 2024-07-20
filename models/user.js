@@ -17,29 +17,9 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         trim: true
     },
-   
     designation_id: {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Designation',
-        trim: true
-    },
-    department_id: {
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Department',
-        trim: true
-    },
-    official_phone: {
-        type: String,
-        validate: validatorHelper.companyPhoneValidate,
-        trim: true
-    },
-    official_email: {
-        type: String,
-        index:true,
-        sparse: true, 
-        unique: true,
-        lowercase: true,
-        validate: validatorHelper.companyEmailValidate,
         trim: true
     },
     dob: {

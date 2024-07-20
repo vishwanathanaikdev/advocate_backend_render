@@ -6,7 +6,6 @@ const Imap = require('node-imap')
 const {simpleParser} = require('mailparser')
 
 exports.sendMail = (mailOptions, from=null)=>{
-    // console.log('mailOptions',mailOptions)
     // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -57,7 +56,6 @@ exports.sendFromPersonal = async (config) => {
         })
         transporter.sendMail(config.mailOptions, (err, info)=>{
             if(err) {
-                console.log(err)
                 logs.error(`Email:- ${err}`)
                 return resolve({status: false})
             }

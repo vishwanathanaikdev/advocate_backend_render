@@ -1,7 +1,7 @@
 const router = require('express').Router()
 const multer = require('multer')
 const path = require('path')
-const LandAllocateController = require("../controllers/land_allocate.controller")
+const caseController = require("../controllers/case.controller")
 const jwt  = require("../middlewares/jwt")
 
 
@@ -34,12 +34,12 @@ let upload = multer({ storage: storage}).fields([
 let upload1 = multer({ storage: storage}).single('file')
 
 
-router.get('/get/:id?',jwt.verifyToken, LandAllocateController.get)
-router.post('/create', jwt.verifyToken,LandAllocateController.create(upload, multer))
-router.post('/update/:id',jwt.verifyToken, LandAllocateController.update(upload, multer))
-router.post('/upload_excel',[jwt.verifyToken],LandAllocateController.upload_excel(upload1,multer))
-router.delete('/delete/:id?',jwt.verifyToken, LandAllocateController.delete)
-router.delete('/delete_all',jwt.verifyToken, LandAllocateController.delete_all)
-router.get('/filter',jwt.verifyToken, LandAllocateController.filter)
+router.get('/get/:id?',jwt.verifyToken, caseController.get)
+router.post('/create', jwt.verifyToken,caseController.create(upload, multer))
+router.post('/update/:id',jwt.verifyToken, caseController.update(upload, multer))
+router.post('/upload_excel',[jwt.verifyToken],caseController.upload_excel(upload1,multer))
+router.delete('/delete/:id?',jwt.verifyToken, caseController.delete)
+router.delete('/delete_all',jwt.verifyToken, caseController.delete_all)
+router.get('/filter',jwt.verifyToken, caseController.filter)
 
 module.exports = router

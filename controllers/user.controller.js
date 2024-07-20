@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt')
 const fs = require('fs')
 const User = require('../models/user')
-const Department = require('../models/department')
+// const Department = require('../models/department')
 const UserAccessToken = require('../models/user_access_token')
 const UserRole = require('../models/user_role')
 const VerifyToken = require('../models/verify_token')
@@ -91,7 +91,6 @@ exports.get = async (req, res) => {
     .skip(skip)
     .limit(limit)
     .exec((err, datas)=>{
-        // console.log('datas',total)
         if(err) return res.status(500).json({'status': false, 'errors': err})
         res.status(200).json({'status': true, 'pagination': {total, limit, totalPages}, 'datas': datas})
     })
@@ -185,8 +184,6 @@ exports.filter = async (req, res) => {
     .skip(skip)
     .limit(limit)
     .exec((err, datas)=>{
-        console.log("err",err)
-        console.log("datas",datas)
         if(err) return res.status(500).json({'status': false, 'errors': err})
         res.status(200).json({'status': true, 'pagination': {total, limit, totalPages}, 'datas': datas})
     })
@@ -330,7 +327,6 @@ exports.complete_onboard_process_hr = (upload, multer) => {
                             mail.sendMail(mailOptions)
                             res.status(200).send({status:true,message:'User data updated successfully'})
                         }).catch((err)=>{
-                            // console.log('err amma',err)
                             res.status(403).send({status:false,err})
                         })
                     })
@@ -380,7 +376,6 @@ exports.update = (upload, multer) => {
     return (req, res)=>{
         let image = ''
         upload(req, res, (err)=>{
-            // console.log("req.file",req.file)
             if(req.file) {
                 if (req.fileValidationError) {
                     return res.status(422).json({'status': false, 'errors': req.fileValidationError})
@@ -389,7 +384,6 @@ exports.update = (upload, multer) => {
                     return res.status(500).json({'status': false, 'errors': err})
                 }
                 else {
-                    console.log("req.file",req.file)
                     image = req.file.path.includes("public\\")?req.file.path.split('public\\')[1].replace(/\\/gi,'/'):req.file.path.split('public/')[1]
                 }
             }
@@ -420,7 +414,6 @@ exports.update = (upload, multer) => {
                         userData.password = bcrypt.hashSync(req.body.password, salt)
                     }
                     rolesData = []
-                    // console.log("userData",userData)
                     User.findOneAndUpdate({_id: req.params.id}, userData, { runValidators: true, context: 'query', new: true }, (err, updatedData)=>{
                         if(err) return res.status(422).json({'status': false, 'errors': errFormatter.formatError(err.message)})
                         if(image !== '') {
@@ -449,14 +442,12 @@ exports.changeProfilePhoto = (upload, multer) => {
     return (req, res) => {
         let userId = req.body.user.id
         upload(req, res, (err)=>{
-            console.log("err kp 0",err)
             if(err) return res.status(500).json({'status': false, 'errors': err})
             if(!req.file) return res.status(422).json({'status': false, 'errors': 'No image selected'})
             if (req.fileValidationError) {
                 return res.status(422).json({'status': false, 'errors': req.fileValidationError})
             }
             else if (err instanceof multer.MulterError || err) {
-                console.log("err kp 1",err)
                 return res.status(500).json({'status': false, 'errors': err})
             }
             
@@ -476,7 +467,6 @@ exports.changeProfilePhoto = (upload, multer) => {
 
 exports.sendResetPasswordLink = async (req, res)=>{
     let params = {}
-    console.log("req body",req.body)
     if(req.body.user_id.match(/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/)) {
         params = {official_email: req.body.user_id}
     }
@@ -519,12 +509,10 @@ exports.verifyResetToken = (req, res) => {
 }
 
 exports.resetPassword = (req, res) => {
-    // console.log("annya")
     verifyResetJwt(req.query.token, res, true, {...req.body})
 }
 
 const verifyResetJwt = (token, res, reset = false, datas={})=>{
-    // console.log("token",token)
     let decoded = jwt.verifyVerificationToken(token)
     if("employee_id" in decoded) {
         VerifyToken.findOne({type: 'reset_password', type_id: decoded.employee_id, token: token}, (err, data)=>{
@@ -566,7 +554,6 @@ const verifyResetJwt = (token, res, reset = false, datas={})=>{
 
 exports.changePassword = async (req, res) => {
 
-    // console.log("req.body",req.body)
     let errors = []
     if(!req.body.password) {
         errors.push({'password': 'Password is required'})
@@ -576,10 +563,7 @@ exports.changePassword = async (req, res) => {
     }
             let user = await User.findById({_id:req.body.user.id}).exec() 
             if(user){
-                // console.log("req.body.old_password",req.body.old_password)
-                // console.log("user.password",user.password)
                 let password_match = await bcrypt.compare(req.body.old_password,user.password)
-                // console.log("password_match",req.body.password_confirmation)
                 if(!password_match){
                     res.status(403).json({'status':false,'msg':'Old password did not match '})
                 }else{
@@ -601,17 +585,15 @@ exports.changePassword = async (req, res) => {
 }
 
 exports.userLogin = (req, res) => {
-    // console.log("req.body",req.body)
     User.findOne({
         $and: [
-                {$or: [{employee_id: req.body.user_id}, {official_email: req.body.user_id}]}, 
+                {$or: [{phone: req.body.user_id}, {email: req.body.user_id}]}, 
                 // {$or: [{isActive: true},]}
         ]
         // {is_partially_verified:false},{sent_for_review:false},{app_access:true}
        
-    }) .populate(['department_id', 'designation_id']).exec((err, data)=>{
+    }) .populate([ 'designation_id']).exec((err, data)=>{
 
-        // console.log('err',err,'data',data)
         if(err) {
             res.status(500).json({'status': false, 'errors': err.errors})
         }
@@ -619,29 +601,21 @@ exports.userLogin = (req, res) => {
             if(data) {
                 if(bcrypt.compareSync(req.body.password, data.password)) {
 
-                    // console.log('data here na',data)
                     const payload = {
                         id: data.id,
                         name: data.name,
                         phone: data.phone,
                         email: data.email,
                         image:data.profile_photo,
-                        employee_id: data.employee_id,
-                        official_email: data.official_email,
-                        official_phone: data.official_phone,
                         is_verified: data.is_verified,
                         is_partially_verified: data.is_partially_verified,
                         sent_for_review: data.sent_for_review,
                         app_access: data.app_access,
                         is_active: data.is_active,
                         exit_form:data.exit_form,
-                        branch:data.branch,
                         designation_id:data.designation_id,
-                        department_id:data.department_id,
                         dob:data.dob,
                         doj:data.doj,
-                        doe:data.doe,
-                        incentive_enabled:data.incentive_enabled,
                     }
                     UserRole.find({user_id: payload.id}).populate({path: 'role_id',model: 'Role', select: 'role_name'}).exec(async(err, roleData)=>{
                         if(err) {
@@ -692,7 +666,6 @@ exports.userLogOut = (req, res) => {
 exports.assignRoles = async (req, res) => {
     let rolesData = []
 
-    // console.log("req.body",req.body)
     req.body.roles.forEach(item=>{
         rolesData.push({user_id: req.body.user_id, role_id: item})
     })
@@ -720,7 +693,6 @@ exports.changepassword_admin = async (req,res) => {
     let password =  bcrypt.hashSync(req.body.password, salt)
     req.body.password = password
 
-    // console.log('req.body',req.body)
     return await User.findOneAndUpdate({_id:req.body.user_id},req.body,{new:true},(err,data)=>{
         err && res.status(422).send({status:false,err:err})
         data && res.status(200).send({status:true,message:'Password Updated Successfully'})
@@ -731,13 +703,11 @@ exports.update_application = async (req,res) =>{
     let password = req.body.name.slice(0,4).concat(Math.random().toString(36).slice(2))
     req.body.password = bcrypt.hashSync(password, salt)
 
-    // console.log('req body',req.body,'REQ.PARAMS',req.params)
     return User.find({_id:req.params.id},async(err,data)=>{
         err && res.status(403).send({status:false,err})
         if(data !== null){
            
             await User.findByIdAndUpdate(req.params.id,req.body,{new:true},(err,data)=>{
-                // console.log('err',err,'data',data)
                 err && res.status(403).send({status:false,err})
                 if(data){
                 if(req.body.shareCredentials  == '1'){    
@@ -794,7 +764,6 @@ exports.reshareCredentials = async (req,res) =>{
 }
 
 exports.resetPassword1 = async (req,res)=>{
-    // console.log('request recieved',req.body)
     return await User.findOne({official_email:req.body.official_email},(err,data)=>{
         err && res.status(403).send({status:false,'error':err})
         if(data !== null){
@@ -828,7 +797,6 @@ exports.resetPassword1 = async (req,res)=>{
 }
 
 exports.verifyOtp = async(req,res)=>{
-    // console.log('req.body',req.body)
     return await User.findOne({official_email:req.body.official_email},(err,data)=>{
         err && res.status(403).send({status:false,'error':err})
         if(data !== null){
@@ -845,7 +813,6 @@ exports.verifyOtp = async(req,res)=>{
 }
 
 exports.getUserOperator = async(req,res)=>{
-//    console.log('req body',req.body)
    let params = {}
    await User.aggregate([
             {$match:{...params}},
@@ -854,8 +821,6 @@ exports.getUserOperator = async(req,res)=>{
                 name:1,
             }}
    ]).exec((err,data)=>{
-    // console.log('data',data)
-    // console.log('err',err)
      return res.status(200).send(data)
    })
 }
@@ -886,7 +851,6 @@ exports.getUserOperatorBasedFilter = async(req,res)=>{
 }
 
 exports.deleteEmployeeOnboarded = async(req,res)=>{
-    // console.log('req . params .id',req.params.id)
     return User.findByIdAndDelete(req.params.id,(err,data)=>{
         err && res.status(403).send({status:false,err:err})
         data && res.status(200).send({status:true,data:data})
@@ -927,8 +891,6 @@ exports.getmyTargetAndAchieved = async(req,res)=>{
             }
            }
     ]).exec((err,data)=>{
-        // console.log("err",err)
-        // console.log("data",data)
           err && res?.status(200).send({status:false,err})
           data && res?.status(200).send({status:true,data})
     })
@@ -976,8 +938,6 @@ exports.targetAchievedWithRevenue = async(req,res)=>{
             }
             
         ]).exec((err,data)=>{
-            // console.log("err",err)
-            // console.log("data",data)
             err && res?.status(200).send({status:false,err})
             data && res?.status(200).send({status:true,data})
         })

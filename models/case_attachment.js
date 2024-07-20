@@ -1,9 +1,9 @@
 const mongoose = require('mongoose')
 
-const landAllocateAttachmentSchema = new mongoose.Schema({
-    land_allocated:{
+const caseAttachmentSchema = new mongoose.Schema({
+    case:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'LandAllocate'
+        ref:'CaseSchema'
     },
     name: {
         type: String,
@@ -18,4 +18,4 @@ const landAllocateAttachmentSchema = new mongoose.Schema({
     timestamps: true
 })  
 
-module.exports = mongoose.model('LandAllocateAttachment', landAllocateAttachmentSchema)
+module.exports = mongoose.model('CaseAttachment', caseAttachmentSchema)

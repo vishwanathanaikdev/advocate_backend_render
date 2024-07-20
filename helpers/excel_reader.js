@@ -3,11 +3,8 @@ const fs = require('fs')
 
 exports.readExcel = (file, headersParam)=>{
     try {
-        console.log("file",file)
-        console.log("headersParam",headersParam)
         const readFile = excelReader.readFile(file.path)
         const sheets = readFile.SheetNames
-        console.log("shetts",sheets)
         const headers = excelReader.utils.sheet_to_json(readFile.Sheets[['Sheet1']], { header: 1 })[0];
         let notIncluded = []
         if(headers) {

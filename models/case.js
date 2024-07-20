@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const landAllocateSchema = new mongoose.Schema({
+const caseSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, 'Name is required'],
@@ -117,4 +117,4 @@ const landAllocateSchema = new mongoose.Schema({
     timestamps: true
 })
 
-module.exports = mongoose.model('LandAllocate', landAllocateSchema)
+module.exports = mongoose.model('CaseSchema', caseSchema)

@@ -3,7 +3,6 @@ const errFormatter = require('../helpers/error.formatter')
 
 exports.get = (req, res)=>{
     Role.find({...req.params.id?{_id: req.params.id}:''}, (err, datas)=>{
-        console.log("err",err,'data',datas)
         err ? res.status(500).json({'status': false, 'errors': err}):
         res.status(200).json({'status': true, 'datas': (datas)?datas: 'No datas found'})
     })
@@ -11,7 +10,6 @@ exports.get = (req, res)=>{
 
 exports.create = (req, res)=>{
     Role.create(req.body, (err, data)=>{
-        console.log('err',err)
         err ? res.status(422).json({'status': false, 'errors': errFormatter.formatError(err.message)}):
         res.status(201).json({'status':true, 'datas': data})
     })

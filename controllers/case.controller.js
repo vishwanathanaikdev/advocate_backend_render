@@ -1,7 +1,7 @@
-const LandAllocate = require("../models/land_allocate")
+const CaseSchema = require("../models/case")
 const excelReader = require('../helpers/excel_reader')
 const errFormatter = require('../helpers/error.formatter')
-const LandAllocateAttachment = require("../models/land_allocate_attachment")
+const CaseAttachment = require("../models/case_attachment")
 const ObjectId = require('mongoose').Types.ObjectId
 const moment = require("moment")
 
@@ -120,15 +120,14 @@ exports.create = (upload,multer)=>{
                     body['andiment'] = `${andiment}`
                 }
 
-                await LandAllocate.create(body,(err,data)=>{
-                      console.log("err",err)
+                await CaseSchema.create(body,(err,data)=>{
                       err && res.status(403).send({status:false,err:err})
 
                       if(data){
                          if(req.files !== undefined && req.files.files !== undefined  && req.files.files.length > 0){
                             let other_files = req.files.files
                             other_files.forEach((d)=>{
-                                LandAllocateAttachment.create({land_allocated:data._id,name:d.originalname,file:d.path.includes("public\\")?d.path.split('public\\')[1].replace(/\\/gi,'/'):d.path.split('public/')[1]},(err,data)=>{})
+                                CaseAttachment.create({land_allocated:data._id,name:d.originalname,file:d.path.includes("public\\")?d.path.split('public\\')[1].replace(/\\/gi,'/'):d.path.split('public/')[1]},(err,data)=>{})
                             })
                             res.status(201).send({status:true,data:'Created Successfully'})
                          }else{
@@ -153,7 +152,7 @@ exports.get = async(req,res)=>{
         }
     }
 
-    total = await LandAllocate.find(params).count()
+    total = await CaseSchema.find(params).count()
 
     totalPages = Math.ceil(total/limit)
 
@@ -164,7 +163,7 @@ exports.get = async(req,res)=>{
         skip = (page - 1) * limit
     }
 
-    return await LandAllocate.aggregate([
+    return await CaseSchema.aggregate([
         {$match:params},
         {
             $lookup:{
@@ -304,13 +303,13 @@ exports.update = (upload,multer)=>{
                 body['andiment'] = `${andiment}`
             }
 
-             await LandAllocate.findByIdAndUpdate(req.params.id,body,(err,data)=>{
+             await CaseSchema.findByIdAndUpdate(req.params.id,body,(err,data)=>{
                    err && res.status(403).send({status:false,err:err})
                    if(data){
                     if(req.files !== undefined && req.files.files !== undefined && req.files.files.length > 0){
                        let other_files = req.files.files
                        other_files.forEach((d)=>{
-                           LandAllocateAttachment.create({land_allocated:data._id,name:d.originalname,file:d.path.includes("public\\")?d.path.split('public\\')[1].replace(/\\/gi,'/'):d.path.split('public/')[1]},(err,data)=>{})
+                           CaseAttachment.create({land_allocated:data._id,name:d.originalname,file:d.path.includes("public\\")?d.path.split('public\\')[1].replace(/\\/gi,'/'):d.path.split('public/')[1]},(err,data)=>{})
                        })
                        res.status(201).send({status:true,data:'Updated Successfully'})
                     }else{
@@ -325,14 +324,14 @@ exports.update = (upload,multer)=>{
 }
 
 exports.delete = async (req,res)=>{
-    return await LandAllocate.findByIdAndDelete(req.params.id,(err,data)=>{
+    return await CaseSchema.findByIdAndDelete(req.params.id,(err,data)=>{
         err && res.status(403).send({status:false,err:err})
         data && res.status(200).send({status:true,data:'Deleted Successfully'})
     }).clone()
 }
 
 exports.delete_all = async (req,res)=>{
-    return await LandAllocate.deleteMany({},(err,data)=>{
+    return await CaseSchema.deleteMany({},(err,data)=>{
         err && res.status(403).send({status:false,err:err})
         data && res.status(200).send({status:true,data:'Deleted Successfully'})
     }).clone()
@@ -361,7 +360,7 @@ exports.filter = async (req,res)=>{
         params = { ...params, ...{ createdAt: { $gte: new Date(from_date), $lt: new Date(moment(to_date).add(1, 'd')) } } }
     }
 
-    total = await LandAllocate.find(params).count()
+    total = await CaseSchema.find(params).count()
     totalPages = Math.ceil(total/limit)
 
 
@@ -374,7 +373,7 @@ exports.filter = async (req,res)=>{
     }
 
 
-    return await LandAllocate.aggregate([
+    return await CaseSchema.aggregate([
         {
             $match:params
         },
@@ -432,7 +431,6 @@ exports.upload_excel =  (upload,multer) =>{
 
             ]
 
-            // console.log("req.body kp ",req.body.user)
 
 
             let read = excelReader.readExcel(req.file, headers)
@@ -478,10 +476,9 @@ exports.upload_excel =  (upload,multer) =>{
                             ration_card:''
                         }
 
-                        // console.log("createData",createData)
                         
                         
-                            let data1 = await LandAllocate.create(createData)                      
+                            let data1 = await CaseSchema.create(createData)                      
                     } catch (err) {
                         errors.push({
                             not_created: {...createData},

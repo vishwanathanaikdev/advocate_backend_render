@@ -577,3 +577,5 @@ Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 
 2023-08-07T18:14:40.259Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED ::1:27017
 2023-10-06T07:50:58.310Z : Database Connection:- MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
 2023-10-06T09:32:21.344Z : Email:- Error: ENOENT: no such file or directory, open '/Users/krishna/Desktop/krishna/projects/web_applications/fidelitus-mysore/fcplmysorebackend/views/emails/sharecredentials.handlebars'
+2024-04-23T09:31:22.035Z : Database Connection:- MongooseServerSelectionError
+2024-04-23T09:38:33.564Z : Email:- Error: No recipients defined
