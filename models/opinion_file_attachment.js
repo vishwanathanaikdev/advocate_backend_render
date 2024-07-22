@@ -1,18 +1,18 @@
 const mongoose = require('mongoose')
 
-const caseAttachmentSchema = new mongoose.Schema({
+const opinionFileAttachmentSchema = new mongoose.Schema({
     created_by:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
     },
-    case:{
+    opinion_file:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'CaseSchema'
+        ref:'OpinionFileSchema'
     },
     name: {
         type: String,
-        required: [true, 'Name is required'],
-        trim: true
+        trim: true,
+        required:false
     },
     title:{
         type: String,
@@ -33,10 +33,10 @@ const caseAttachmentSchema = new mongoose.Schema({
     },
     file:{
         type: String,
-        required:true
+        required:false
     }
 },{
     timestamps: true
 })  
 
-module.exports = mongoose.model('CaseAttachment', caseAttachmentSchema)
+module.exports = mongoose.model('OpinionFileAttachment', opinionFileAttachmentSchema)

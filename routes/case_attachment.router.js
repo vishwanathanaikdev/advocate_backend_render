@@ -8,8 +8,8 @@ const path = require('path')
 
 
 router.get('/get/:id?',jwt.verifyToken, caseAttachmentController.get)
-router.post('/create',jwt.verifyToken,upload_case_docs.single('file'), caseAttachmentController.create)
-router.put('/update/:id',jwt.verifyToken,upload_case_docs.single('file'), caseAttachmentController.update)
+router.post('/create',jwt.verifyToken,caseAttachmentController.create)
+router.put('/update/:id',jwt.verifyToken,caseAttachmentController.update)
 router.delete('/delete/:id',jwt.verifyToken,caseAttachmentController.delete)
 
 module.exports = router
