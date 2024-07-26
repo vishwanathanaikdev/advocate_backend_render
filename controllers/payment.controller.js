@@ -9,13 +9,12 @@ exports.get = async (req, res)=>{
     
     if(ObjectId.isValid(id)){
         if(type === 'case'){
-            params = {case:ObjectId(id)}
+            params = {case:ObjectId(id),type:'case'}
         }else if(type === 'opinion_file'){
-            params = {opinion_file:ObjectId(id)}
+            params = {opinion_file:ObjectId(id),type:'opinion_file'}
         }
     }
 
-    console.log("params",params)
     return await Payment.find(params).populate('created_by').exec((err, data)=>{
         err && res.status(403).send({status:false,err:err})
         data && res.status(200).send({status:true,data:data})

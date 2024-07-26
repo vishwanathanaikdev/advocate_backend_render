@@ -579,3 +579,6 @@ Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 
 2023-10-06T09:32:21.344Z : Email:- Error: ENOENT: no such file or directory, open '/Users/krishna/Desktop/krishna/projects/web_applications/fidelitus-mysore/fcplmysorebackend/views/emails/sharecredentials.handlebars'
 2024-04-23T09:31:22.035Z : Database Connection:- MongooseServerSelectionError
 2024-04-23T09:38:33.564Z : Email:- Error: No recipients defined
+2024-07-25T04:15:51.613Z : Database Connection:- MongooseServerSelectionError
+2024-07-25T04:17:07.291Z : Database Connection:- MongooseServerSelectionError
+2024-07-26T08:39:02.538Z : Database Connection:- MongooseServerSelectionError

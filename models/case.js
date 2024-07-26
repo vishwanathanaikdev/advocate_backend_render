@@ -37,6 +37,10 @@ const caseSchema = new mongoose.Schema({
         type:String,
         default:''
     },
+    case_details:{
+        type:String,
+        default:''
+    },
     stage:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'CaseStage'

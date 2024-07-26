@@ -26,10 +26,17 @@ exports.get = async (req, res)=>{
 exports.getbills = async (req,res)=>{
 
     let params={},total=0,totalPages=0,skip=0,limit=25;
-    let {page=1,from_date,to_date} = req.query
+    let {page=1,from_date,to_date,step= 1} = req.query
 
     if (from_date && to_date) {
         params = { ...params, ...{ createdAt: { $gte: new Date(from_date), $lt: new Date(moment(to_date).add(1, 'd')) } } }
+    }
+
+
+    if(step == 1){
+        params = { ...params,completedPaymentRecieved:false}
+    }else{
+        params = { ...params,completedPaymentRecieved:true}
     }
 
     total = await Bills.find(params).count()

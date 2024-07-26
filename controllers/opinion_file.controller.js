@@ -16,7 +16,7 @@ exports.create = async(req,res)=>{
 }
         
 exports.get = async(req,res)=>{
-    let {page,type='',search='',from_date='',to_date=''} = req.query
+    let {page,type='',search='',from_date='',to_date='',step=1} = req.query
     let {id} = req.params
     let params = {},skip=0,limit=25,total=0,totalPages=0;
 
@@ -45,6 +45,18 @@ exports.get = async(req,res)=>{
 
         
     }
+
+    if(step == 1){
+        params = {...params,status:'Pending'}
+    }else if(step == 2){
+        params = {...params,status:'In Progress'}
+    }else if(step == 3){
+        params = {...params,status:'Completed'}
+    }else if(step == 4){
+        params = {...params,status:'Hold'}
+    }
+
+
 
     total = await OpinionFile.find(params).count()
 

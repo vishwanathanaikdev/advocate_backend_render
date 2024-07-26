@@ -18,7 +18,7 @@ exports.create = async(req,res)=>{
 }
         
 exports.get = async(req,res)=>{
-    let {page,type='',search='',from_date='',to_date=''} = req.query
+    let {page,type='',search='',from_date='',to_date='',step =1} = req.query
     let {id} = req.params
     let params = {},skip=0,limit=25,total=0,totalPages=0;
 
@@ -54,9 +54,15 @@ exports.get = async(req,res)=>{
     }
 
 
-    console.log("params",params)
-
-
+    if(step == 1){
+        params = {...params,status:'Pending'}
+    }else if(step == 2){
+        params = {...params,status:'In Progress'}
+    }else if(step == 3){
+        params = {...params,status:'Completed'}
+    }else if(step == 4){
+        params = {...params,status:'Hold'}
+    }
 
     total = await CaseSchema.find(params).count()
 
@@ -400,7 +406,6 @@ exports.fileUpload = (req,res)=>{
 
 exports.upload_case_attachment_file = async(req,res)=>{
     let body = {...req.body}
-    console.log("body",body)
     body['created_by'] = req.body.user.id
     await CaseAttachment.create(req.body,(err,data)=>{
           err && res.status(403).send({status:false,err:err})
