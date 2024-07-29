@@ -20,9 +20,10 @@ const activity = new mongoose.Schema({
         ref:'ClientSchema',
         required:false
     },
-    description:{
-        type: String,
-        default:''
+    stage:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'CaseStage',
+        required:false
     },
     attachment:{
         type: String,
@@ -34,16 +35,20 @@ const activity = new mongoose.Schema({
     },
     next_hearing_date:{
         type: Date,
-        required:true
-    },
-    date:{
-        type: Date,
-        required:true
+        required:false
     },
     type:{
         type: String,
         enum:['case','opinion_file'],
         default:'case' 
+    },
+    important:{
+        type:Boolean,
+        default:false
+    }, 
+    summary:{
+        type: String,
+        default:''
     },
 },{
     timestamps: true

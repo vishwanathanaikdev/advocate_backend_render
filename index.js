@@ -15,6 +15,7 @@ const user = require('./routes/user.router')
 const opinionfileroute = require('./routes/opinion_file.router')
 const caseroute = require('./routes/case.router')
 const homeData = require('./routes/home_data.router')
+const activity = require('./routes/activity.router')
 const opinion_file_attachment = require('./routes/opinion_file_attachment.router')
 const land_allocate_attachment = require('./routes/case_attachment.router')
 const bills = require('./routes/bills.router')
@@ -45,15 +46,14 @@ app.use('/api/opinion_file', opinionfileroute)
 app.use('/api/opinion_file_attachment', opinion_file_attachment)
 app.use('/api/land_allocate_attachment', land_allocate_attachment)
 app.use('/api/home_data', homeData)
-
-
+app.use('/api/activity', activity)
 
 
 app.use((req, res, next) => {
     res.status(404).json({ 'status': false, 'errors': 'Requested url not found' })
 })
 
-// require('./crons')
+require('./crons')
 
 
 

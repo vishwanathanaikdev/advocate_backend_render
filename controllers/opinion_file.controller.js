@@ -9,7 +9,7 @@ const moment = require("moment")
 exports.create = async(req,res)=>{
     let body = {...req.body}
     body['created_by'] = req.body.user.id
-    await OpinionFile.create(req.body,(err,data)=>{
+    await OpinionFile.create(body,(err,data)=>{
           err && res.status(403).send({status:false,err:err})
           data && res.status(201).send({status:true,data:'Created Successfully'})
     })
@@ -113,6 +113,7 @@ exports.get = async(req,res)=>{
             preserveNullAndEmptyArrays:true
            }
         },
+        {$sort:{createdAt:-1}},
         {$skip:skip},
         {$limit:limit}
     ]).exec((err,datas)=>{

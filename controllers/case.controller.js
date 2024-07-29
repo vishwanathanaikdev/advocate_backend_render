@@ -11,7 +11,7 @@ const moment = require("moment")
 exports.create = async(req,res)=>{
     let body = {...req.body}
     body['created_by'] = req.body.user.id
-    await CaseSchema.create(req.body,(err,data)=>{
+    await CaseSchema.create(body,(err,data)=>{
           err && res.status(403).send({status:false,err:err})
           data && res.status(201).send({status:true,data:'Created Successfully'})
     })
@@ -133,20 +133,7 @@ exports.get = async(req,res)=>{
             preserveNullAndEmptyArrays:true
            }
         },
-        {
-            $lookup:{
-                from:"users",
-                localField:"created_by",
-                foreignField:"_id",
-                as:"created_by",
-            }
-        },
-        {
-           $unwind:{
-            path:"$created_by",
-            preserveNullAndEmptyArrays:true
-           }
-        },
+        { $sort: { createdAt: -1 } },
         {$skip:skip},
         {$limit:limit}
     ]).exec((err,datas)=>{

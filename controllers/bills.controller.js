@@ -100,6 +100,48 @@ exports.getbills = async (req,res)=>{
                         preserveNullAndEmptyArrays:true
                        }
                     },
+                    {
+                        $lookup:{
+                            from:"users",
+                            localField:"created_by",
+                            foreignField:"_id",
+                            as:"created_by",
+                        }
+                    },
+                    {
+                       $unwind:{
+                        path:"$created_by",
+                        preserveNullAndEmptyArrays:true
+                       }
+                    },
+                    {
+                        $lookup:{
+                            from:"casestages",
+                            localField:"stage",
+                            foreignField:"_id",
+                            as:"stage",
+                        }
+                    },
+                    {
+                       $unwind:{
+                        path:"$stage",
+                        preserveNullAndEmptyArrays:true
+                       }
+                    },
+                    {
+                        $lookup:{
+                            from:"casetypes",
+                            localField:"case_type",
+                            foreignField:"_id",
+                            as:"case_type",
+                        }
+                    },
+                    {
+                       $unwind:{
+                        path:"$case_type",
+                        preserveNullAndEmptyArrays:true
+                       }
+                    },
                 ],
                 as:"case",
             }
@@ -118,6 +160,20 @@ exports.getbills = async (req,res)=>{
                 pipeline:[
                     {
                         $lookup:{
+                            from:"users",
+                            localField:"allocation_of_work",
+                            foreignField:"_id",
+                            as:"allocation_of_work",
+                        }
+                    },
+                    {
+                       $unwind:{
+                        path:"$allocation_of_work",
+                        preserveNullAndEmptyArrays:true
+                       }
+                    },
+                    {
+                        $lookup:{
                             from:"clientschemas",
                             localField:"client",
                             foreignField:"_id",
@@ -127,6 +183,20 @@ exports.getbills = async (req,res)=>{
                     {
                        $unwind:{
                         path:"$client",
+                        preserveNullAndEmptyArrays:true
+                       }
+                    },
+                    {
+                        $lookup:{
+                            from:"users",
+                            localField:"created_by",
+                            foreignField:"_id",
+                            as:"created_by",
+                        }
+                    },
+                    {
+                       $unwind:{
+                        path:"$created_by",
                         preserveNullAndEmptyArrays:true
                        }
                     },

@@ -31,6 +31,9 @@ const ReminderSchema = new mongoose.Schema({
         default: null,
         trim: true
     },
+    date:{
+        type: Date,
+    },
     type:{
         type: String,
         enum:['case','opinion_file'],

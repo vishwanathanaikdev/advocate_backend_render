@@ -95,9 +95,8 @@ exports.get = async(req,res)=>{
       }
     ]).exec()
 
-
     const today_reminder = await Reminder.aggregate([
-      
+      {$match:{date: {$gte: new Date(JSON.stringify(new Date()).slice(1,11)), $lt: new Date(moment(JSON.stringify(new Date()).slice(1,11)).add(1, 'd'))}}},
       {
          $lookup:{
             from:'caseschemas',
@@ -115,6 +114,34 @@ exports.get = async(req,res)=>{
                {
                   $unwind:{
                      path:"$client",
+                     preserveNullAndEmptyArrays:true
+                  }
+               },
+               {
+                  $lookup:{
+                     from:'casetypes',
+                     localField:'case_type',
+                     foreignField:'_id',
+                     as:'case_type'
+                  }
+               },
+               {
+                  $unwind:{
+                     path:"$case_type",
+                     preserveNullAndEmptyArrays:true
+                  }
+               },
+               {
+                  $lookup:{
+                     from:'casestages',
+                     localField:'stage',
+                     foreignField:'_id',
+                     as:'stage'
+                  }
+               },
+               {
+                  $unwind:{
+                     path:"$stage",
                      preserveNullAndEmptyArrays:true
                   }
                }
@@ -136,15 +163,29 @@ exports.get = async(req,res)=>{
             pipeline:[
                {
                   $lookup:{
-                     from:'clientschemas',
-                     localField:'client',
+                     from:'users',
+                     localField:'allocation_of_work',
                      foreignField:'_id',
-                     as:'client'
+                     as:'allocation_of_work'
                   }
                },
                {
                   $unwind:{
-                     path:"$client",
+                     path:"$allocation_of_work",
+                     preserveNullAndEmptyArrays:true
+                  }
+               },
+               {
+                  $lookup:{
+                     from:'users',
+                     localField:'created_by',
+                     foreignField:'_id',
+                     as:'created_by'
+                  }
+               },
+               {
+                  $unwind:{
+                     path:"$created_by",
                      preserveNullAndEmptyArrays:true
                   }
                }
