@@ -5,7 +5,7 @@ const isRole = require('../middlewares/is_role')
 const multer = require('multer')
 const path = require('path')
 const imageValidation = require('../helpers/upload.helper')
-
+const { upload_employee_docs } = require('../helpers/awsUpload.helper')
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -17,17 +17,15 @@ const storage = multer.diskStorage({
     }
 })
 
-let upload = multer({ storage: storage, fileFilter: imageValidation.imageFilter }).single('image')
-
 
 // [jwt.verifyToken, isRole.isRole(['admin', 'controller', 'hod', 'db_head', 'db_user'])],
 router.get('/get/:id?/:status?',  userController.get)
 router.get('/search', jwt.verifyToken, userController.filter)
 router.get('/profile/:id', jwt.verifyToken, userController.profile)
 router.post('/login', userController.userLogin)
-router.post('/create', userController.create(upload, multer))
-router.post('/update/:id', [jwt.verifyToken], userController.update(upload, multer))
-router.post('/update-profile-photo', jwt.verifyToken, userController.changeProfilePhoto(upload, multer))
+router.post('/create', userController.create)
+router.post('/update/:id', [jwt.verifyToken], userController.update)
+router.post('/update-profile-photo', jwt.verifyToken, userController.changeProfilePhoto)
 router.post('/send-reset-password-link', userController.sendResetPasswordLink)
 router.get('/verify-reset-token', userController.verifyResetToken)
 router.post('/reset-password', userController.resetPassword)
@@ -41,4 +39,7 @@ router.post('/reset_password',userController.resetPassword1)
 
 
 router.put('/disableAppAccess/:id',userController.disableAppAccess)
+
+router.post('/upload_file',jwt.verifyToken,upload_employee_docs.single('file'),userController.fileUpload)
+
 module.exports = router

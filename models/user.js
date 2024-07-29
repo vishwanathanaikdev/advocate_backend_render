@@ -8,15 +8,6 @@ const userSchema = new mongoose.Schema({
         validate: validatorHelper.nameValidator,
         trim: true
     },
-    employee_id: {
-        type: String,
-        sparse: true, 
-        unique: true,
-        uniqueCaseInsensitive: true,
-        max: 12,
-        lowercase: true,
-        trim: true
-    },
     designation_id: {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Designation',

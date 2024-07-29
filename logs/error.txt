@@ -582,3 +582,4 @@ Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 
 2024-07-25T04:15:51.613Z : Database Connection:- MongooseServerSelectionError
 2024-07-25T04:17:07.291Z : Database Connection:- MongooseServerSelectionError
 2024-07-26T08:39:02.538Z : Database Connection:- MongooseServerSelectionError
+2024-07-29T10:23:04.733Z : Email:- Error: No recipients defined

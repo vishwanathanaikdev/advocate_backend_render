@@ -2,8 +2,6 @@ const nodemailer = require("nodemailer")
 const hbs = require('nodemailer-express-handlebars')
 const path = require('path')
 const logs = require('./logger.helper').Logger
-const Imap = require('node-imap')
-const {simpleParser} = require('mailparser')
 
 exports.sendMail = (mailOptions, from=null)=>{
     // create reusable transporter object using the default SMTP transport
@@ -40,30 +38,5 @@ exports.sendMail = (mailOptions, from=null)=>{
             logs.info(`Email:- ${logData}`)
             return info
         }
-    })
-}
-
-exports.sendFromPersonal = async (config) => {
-    return new Promise((resolve, reject)=>{
-        let transporter = nodemailer.createTransport({
-            host: config.host,
-            port: config.port,
-            secure: config.port == 465?true:false, // true for 465, false for other ports
-            auth: {
-                user: config.user, // generated ethereal user
-                pass: config.password, // generated ethereal password
-            },
-        })
-        transporter.sendMail(config.mailOptions, (err, info)=>{
-            if(err) {
-                logs.error(`Email:- ${err}`)
-                return resolve({status: false})
-            }
-            else {
-                let logData = `Email sent [From: ${info.envelope.from}, To: ${info.envelope.to}, MessageId: ${info.messageId}, Response: ${info.response}}]`
-                logs.info(`Email:- ${logData}`)
-                return resolve({status: true})
-            }
-        })
     })
 }

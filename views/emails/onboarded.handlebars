@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {{!-- <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script> --}}
+    <style>
+        @font-face {
+          font-family: 'verdana';
+          src: url("../../public/fonts/verdana.ttf");
+          font-style: normal;
+        }
+      body {
+          padding: 0;
+          margin: 0;
+          font-family: 'verdana' !important;
+      }
+      p{
+        font-family: 'verdana' !important;
+
+      }
+    </style>
+
+  </head>
+  <body>
+   <div>
+    <p style="font-size:12px;margin:0px;padding:0px">Dear {{name}},</p>
+
+    <p style="font-size:12px;margin:10px 0px 15px 0px;padding:0px">The account creation has been completed for the application usage please use the below credentials for app access on daily purpose.</h6>
+    <p style="font-size:12px;margin:10px 0px 15px 0px;padding:0px">App URL : {{url}}</p>
+   
+    <br></br>
+    <p style="font-size:12px;margin:10px 0px 15px 0px;padding:0px">Mobile No : {{mobile}}</p>
+    <p style="font-size:12px;margin:10px 0px 15px 0px;padding:0px">Password : {{password}}</p>
+    
+    <p style="font-size:12px;margin:15px 0px 15px 0px;padding:0px">Best regards,</p>
+    <p style="font-size:12px;margin:0px;padding:0px">Advocate CRM chat bot</p>
+  </div>
+
+  </body>     
+</html>
+

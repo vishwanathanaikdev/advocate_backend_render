@@ -234,73 +234,34 @@ exports.profile = async (req, res) => {
     })
 }
 
-exports.create = (upload,multer) =>{
-
-    return (req, res)=>{
-        let image = ''
-        upload(req, res, (err)=>{
-            if (req.fileValidationError) {
-                return res.status(422).json({'status': false,'errors': req.fileValidationError})
+exports.create = async (req, res)=>{
+    let userData = Object.assign({}, req.body)
+    let password = userData.name.slice(0,4).concat(Math.random().toString(36).slice(2))
+    userData.password = bcrypt.hashSync(password, salt)
+    delete userData.user
+    
+    rolesData = []
+   await User.create(userData, (err, data)=>{
+        if(err) {
+            return res.status(422).json({'status': false, 'errors': errFormatter.formatError(err.message)})
+        }
+        let mailOptions = {
+            to:req.body.official_email,
+            subject: "Fidelitus Corp CRM",
+            template: 'sharecredentials',
+            context:{
+                name:userData.name,
+                id:userData.employee_id,
+                password:password,
             }
-            else if (err instanceof multer.MulterError || err) {
-                return res.status(422).json({'status': false,'errors': err})
-            }
-            else {
-                if(req.file) {
-                    image = req.file.path.includes("public\\")?req.file.path.split('public\\')[1].replace(/\\/gi,'/'):req.file.path.split('public/')[1]
-                }
-            }
-            let userData = Object.assign({}, req.body)
-            let password = userData.name.slice(0,4).concat(Math.random().toString(36).slice(2))
-            userData.password = bcrypt.hashSync(password, salt)
-            delete userData.user
-            if(image !== '') {
-                userData.profile_photo = image
-            }
-            rolesData = []
-            User.create(userData, (err, data)=>{
-                if(err) {
-                    if(req.file) {
-                        fs.unlinkSync('public/'+image)
-                    }
-                    return res.status(422).json({'status': false, 'errors': errFormatter.formatError(err.message)})
-                }
-                let mailOptions = {
-                    to:req.body.official_email,
-                    subject: "Fidelitus Corp CRM",
-                    template: 'sharecredentials',
-                    context:{
-                        name:userData.name,
-                        id:userData.employee_id,
-                        password:password,
-                    }
-                }
-                mail.sendMail(mailOptions)
-                res.status(201).send({Status:true,message:'Credential shared to the user'})
-            })
-        })
-    }
+        }
+        mail.sendMail(mailOptions)
+        res.status(201).send({Status:true,message:'Credential shared to the user'})
+    })
 }
 
-exports.complete_onboard_process_hr = (upload, multer) => {
-    return (req,res)=>{
-        let image = ''
-        upload(req, res, (err)=>{
-            if (req.fileValidationError) {
-                return res.status(422).json({'status': false,'errors': req.fileValidationError})
-            }
-            else if (err instanceof multer.MulterError || err) {
-                return res.status(422).json({'status': false,'errors': err})
-            }
-            else {
-                if(req.file) {
-                    image = req.file.path.includes("public\\")?req.file.path.split('public\\')[1].replace(/\\/gi,'/'):req.file.path.split('public/')[1]
-                }
-            }
-            
-            if(image !== '') {
-                userData.profile_photo = image
-            }
+exports.complete_onboard_process_hr = async (req,res)=>{
+        
             if(req.params.id){
                     User.findByIdAndUpdate(req.params.id,{...req.body},{new:true},(err,data)=>{
                         if(req?.body?.roles?.length > 0){
@@ -332,137 +293,28 @@ exports.complete_onboard_process_hr = (upload, multer) => {
                     })
             }
             else{
-                rolesData = []
                 User.create(userData, (err, data)=>{
                     if(err) {
-                        if(req.file) {
-                            fs.unlinkSync('public/'+image)
-                        }
                         return res.status(422).json({'status': false, 'errors': errFormatter.formatError(err.message)})
                     }
-                    if(req.body.roles.length > 0){
-                        req.body.roles.forEach(element => {
-                            rolesData.push({user_id: data.id, role_id: element})
-                        });
-                        saveRoles(rolesData)
-                    }
-                    
-                    
-                    // let mailOptions = {
-                    //     to: data.official_email,
-                    //     subject: "CRM Onboard",
-                    //     html: `<h1>Hello ${data.name},</h1>
-                    //     <p>Please find your credentials below</p>
-                    //     <p>
-                    //         UserID: ${data.employee_id}<br>
-                    //         Password: ${password}
-                    //     </p>
-                    //     `
-                    // }
-                    // mail.sendMail(mailOptions)
-                    res.status(201).json({'status': true, 'datas': {data, rolesData}})
+                    res.status(201).json({'status': true, 'datas': {data}})
                 })
             }      
-                // res.status(201).json({'status': true, 'datas': {data, rolesData}})
-            })
 
-
-         
-    }        
-         
 }
 
-exports.update = (upload, multer) => {
-    return (req, res)=>{
-        let image = ''
-        upload(req, res, (err)=>{
-            if(req.file) {
-                if (req.fileValidationError) {
-                    return res.status(422).json({'status': false, 'errors': req.fileValidationError})
-                }
-                else if (err instanceof multer.MulterError || err) {
-                    return res.status(500).json({'status': false, 'errors': err})
-                }
-                else {
-                    image = req.file.path.includes("public\\")?req.file.path.split('public\\')[1].replace(/\\/gi,'/'):req.file.path.split('public/')[1]
-                }
-            }
-            User.aggregate([{$match: {_id: ObjectId(req.params.id)}},{
-                $lookup: {
-                    from: 'user_roles',
-                    localField: '_id',
-                    foreignField: 'user_id',
-                    as: 'user_roles'
-                }
-            },{
-                $lookup: {
-                    from: 'roles',
-                    localField: 'user_roles.role_id',
-                    foreignField: '_id',
-                    as: 'roles'
-                }
-            }], (err, data)=>{
-                if(err) return res.status(500).json({'status': false, 'errors': err})
-                if(data) {
-                    let userData = Object.assign({}, req.body)
-                    delete userData.user
-                    delete userData.dob
-                    if(image !== '') {
-                        userData.profile_photo = image
-                    }
-                    if(req.body.password) {
-                        userData.password = bcrypt.hashSync(req.body.password, salt)
-                    }
-                    rolesData = []
-                    User.findOneAndUpdate({_id: req.params.id}, userData, { runValidators: true, context: 'query', new: true }, (err, updatedData)=>{
-                        if(err) return res.status(422).json({'status': false, 'errors': errFormatter.formatError(err.message)})
-                        if(image !== '') {
-                            if(data[0].profile_photo && fs.existsSync('public/'+data[0].profile_photo)) {
-                                fs.unlinkSync('public/'+data[0].profile_photo)
-                            }
-                        }
-                        if(req.body.roles) {
-                            req.body.roles.forEach(element => {
-                                rolesData.push({user_id: req.params.id, role_id: element})
-                            });
-                            UserRole.deleteMany({user_id: req.params.id, role_id: {$nin: rolesData.map((role)=>role.role_id)}}, (err, data)=>{})
-                        }
-                        if(rolesData.length) {
-                            saveRoles(rolesData)
-                        }
-                        res.status(200).json({'status': true, 'datas': {updatedData, rolesData}})
-                    })
-                }
-            })
-        })
-    }
+exports.update = async (req, res)=>{
+    await User.findByIdAndUpdate(req.params.id,{...req.body},{new:true},(err,data)=>{
+        err && res.status(403).send({status:false,err:err})
+        data && res.status(200).send({status:true,data:data})
+    }).clone()
 }
 
-exports.changeProfilePhoto = (upload, multer) => {
-    return (req, res) => {
-        let userId = req.body.user.id
-        upload(req, res, (err)=>{
-            if(err) return res.status(500).json({'status': false, 'errors': err})
-            if(!req.file) return res.status(422).json({'status': false, 'errors': 'No image selected'})
-            if (req.fileValidationError) {
-                return res.status(422).json({'status': false, 'errors': req.fileValidationError})
-            }
-            else if (err instanceof multer.MulterError || err) {
-                return res.status(500).json({'status': false, 'errors': err})
-            }
-            
-            User.findOne({_id: userId}, (err, data)=>{
-                if(err) return res.status(500).json({'status': false, 'errors': err})
-                if(data.profile_photo) {
-                    fs.unlinkSync('public/'+data.profile_photo)
-                }
-                User.updateOne({_id: userId}, {profile_photo: req.file.path.includes("public\\")?req.file.path.split('public\\')[1].replace(/\\/gi,'/'):req.file.path.split('public/')[1]}, { runValidators: true, context: 'query', new: true }, (err, data)=>{
-                    if(err) return res.status(500).json({'status': false, 'errors': err})
-                    res.status(200).json({'status': true, 'datas':{data:data,photo:req.file.path.includes("public\\")?req.file.path.split('public\\')[1].replace(/\\/gi,'/'):req.file.path.split('public/')[1]}})
-                })
-            })
-        })
-    }
+exports.changeProfilePhoto = async (req, res) => {
+    await User.findByIdAndUpdate(req.body.user.id, {...req.body}, { runValidators: true, context: 'query', new: true }, (err, data)=>{
+        if(err) return res.status(500).json({'status': false, 'errors': err})
+        res.status(200).json({'status': true, 'datas':data})
+    })
 }
 
 exports.sendResetPasswordLink = async (req, res)=>{
@@ -863,6 +715,11 @@ exports.disableAppAccess = async(req,res)=>{
         data && res.status(200).send({status:true,data:data})
     }).clone()
 }
+
+exports.fileUpload = (req,res)=>{
+    return res.status(200).send({status:true,data:req.file.key})
+} 
+
 
 exports.deletemass = async(req,res)=>{
     await user.deleteMany({});
