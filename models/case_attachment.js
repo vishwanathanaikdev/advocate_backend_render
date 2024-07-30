@@ -11,7 +11,7 @@ const caseAttachmentSchema = new mongoose.Schema({
     },
     name: {
         type: String,
-        required: [true, 'Name is required'],
+        required: [false, 'Name is required'],
         trim: true
     },
     title:{
@@ -33,7 +33,7 @@ const caseAttachmentSchema = new mongoose.Schema({
     },
     file:{
         type: String,
-        required:true
+        required:false
     }
 },{
     timestamps: true
