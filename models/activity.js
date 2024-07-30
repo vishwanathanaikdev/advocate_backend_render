@@ -27,7 +27,8 @@ const activity = new mongoose.Schema({
     },
     attachment:{
         type: String,
-        default:''
+        default:'',
+        required:false
     },
     remarks:{
         type: String,

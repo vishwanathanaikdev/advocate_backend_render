@@ -58,6 +58,10 @@ const caseSchema = new mongoose.Schema({
         enum:['Pending','In Progress','Completed','Hold'],
         default:'Pending'
     },
+    next_hearing_date:{
+        type:Date,
+        required:false
+    },
 },{
     timestamps: true
 })

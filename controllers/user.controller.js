@@ -246,12 +246,13 @@ exports.create = async (req, res)=>{
             return res.status(422).json({'status': false, 'errors': errFormatter.formatError(err.message)})
         }
         let mailOptions = {
-            to:req.body.official_email,
-            subject: "Fidelitus Corp CRM",
+            to:req.body.email,
+            subject: "Advocate CRM Credentials",
             template: 'sharecredentials',
             context:{
                 name:userData.name,
-                id:userData.employee_id,
+                url:process.env.APP_URL,
+                mobile:userData.phone,
                 password:password,
             }
         }

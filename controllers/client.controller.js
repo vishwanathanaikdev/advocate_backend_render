@@ -72,6 +72,8 @@ exports.create = (upload,multer)=>{
 exports.get = async(req,res)=>{
     let {page,type} = req.query
     let {id} = req.params
+    let roles = req.body.user.roles
+    let user = req.body.user.id
     let params = {},skip=0,limit=25,total=0,totalPages=0;
 
     if(id !== '' && id !== 'null' && id !== null && id !== undefined){
@@ -82,6 +84,11 @@ exports.get = async(req,res)=>{
         if(type !== undefined && type !== null && type !== ''){
             params={is_active:type === 'in_active' ? false : true}
         }
+    }
+
+    if(roles?.includes('admin')){
+    }else{
+       params ={...params,created_by:ObjectId(user)}
     }
 
     total = await ClientSchema.find(params).count()

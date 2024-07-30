@@ -18,6 +18,8 @@ exports.create = async(req,res)=>{
 exports.get = async(req,res)=>{
     let {page,type='',search='',from_date='',to_date='',step=1} = req.query
     let {id} = req.params
+    let roles = req.body.user.roles
+    let user = req.body.user.id
     let params = {},skip=0,limit=25,total=0,totalPages=0;
 
     
@@ -56,7 +58,10 @@ exports.get = async(req,res)=>{
         params = {...params,status:'Hold'}
     }
 
-
+    if(roles?.includes('admin')){
+    }else{
+       params ={...params,created_by:ObjectId(user)}
+    }
 
     total = await OpinionFile.find(params).count()
 

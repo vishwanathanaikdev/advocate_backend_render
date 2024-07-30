@@ -27,7 +27,8 @@ exports.getbills = async (req,res)=>{
 
     let params={},total=0,totalPages=0,skip=0,limit=25;
     let {page=1,from_date,to_date,step= 1} = req.query
-
+    let roles = req.body.user.roles
+    let user = req.body.user.id
     if (from_date && to_date) {
         params = { ...params, ...{ createdAt: { $gte: new Date(from_date), $lt: new Date(moment(to_date).add(1, 'd')) } } }
     }
@@ -37,6 +38,11 @@ exports.getbills = async (req,res)=>{
         params = { ...params,completedPaymentRecieved:false}
     }else{
         params = { ...params,completedPaymentRecieved:true}
+    }
+
+    if(roles?.includes('admin')){
+    }else{
+       params ={...params,created_by:ObjectId(user)}
     }
 
     total = await Bills.find(params).count()
@@ -238,7 +244,7 @@ exports.getbills = async (req,res)=>{
         }
     ]).exec((err,datas)=>{
         err && res.status(403).send({status:false,err:err})
-        datas && res.status(403).send({status:true,datas:datas,pagination:{total,totalPages,limit}})
+        datas && res.status(200).send({status:true,datas:datas,pagination:{total,totalPages,limit}})
     })
 
 }

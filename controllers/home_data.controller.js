@@ -17,22 +17,23 @@ exports.get = async(req,res)=>{
        params = {created_by:ObjectId(req.body.user.id)}
     }
 
-    const total_case = await Case.find({}).count()
-    const total_case_pending = await Case.find({status:'Pending'}).count()
-    const total_case_progress = await Case.find({status:'In Progress'}).count()
-    const total_case_completed = await Case.find({status:'Completed'}).count()
-    const total_case_hold = await Case.find({status:'Hold'}).count()
+    const total_case = await Case.find(params).count()
+    const total_case_pending = await Case.find({...params,status:'Pending'}).count()
+    const total_case_progress = await Case.find({...params,status:'In Progress'}).count()
+    const total_case_completed = await Case.find({...params,status:'Completed'}).count()
+    const total_case_hold = await Case.find({...params,status:'Hold'}).count()
 
-    const total_opinion_file = await OpinionFile.find({}).count()
-    const total_opinion_file_pending = await OpinionFile.find({status:'Pending'}).count()
-    const total_opinion_file_progress = await OpinionFile.find({status:'In Progress'}).count()
-    const total_opinion_file_completed = await OpinionFile.find({status:'Completed'}).count()
-    const total_opinion_file_hold = await OpinionFile.find({status:'Hold'}).count()
+    const total_opinion_file = await OpinionFile.find(params).count()
+    const total_opinion_file_pending = await OpinionFile.find({...params,status:'Pending'}).count()
+    const total_opinion_file_progress = await OpinionFile.find({...params,status:'In Progress'}).count()
+    const total_opinion_file_completed = await OpinionFile.find({...params,status:'Completed'}).count()
+    const total_opinion_file_hold = await OpinionFile.find({...params,status:'Hold'}).count()
 
-    const bills = await Bills.find({}).count()
+    const bills = await Bills.find(params).count()
 
    
     const billstotalAmt = await Bills.aggregate([
+                  {$match:params},
                   {
                      $group:{
                         _id:null,
@@ -43,8 +44,9 @@ exports.get = async(req,res)=>{
     ]).exec()
 
    
-    const payment = await Payment.find({}).count()
+    const payment = await Payment.find(params).count()
     const paymenttotalAmt = await Payment.aggregate([
+      {$match:params},
       {
          $group:{
             _id:null,
@@ -54,8 +56,8 @@ exports.get = async(req,res)=>{
       }
    ]).exec()
 
-    const reminder = await Reminder.find({}).count()
-    const reminder_active = await Reminder.find({isActive:true}).count()
+    const reminder = await Reminder.find(params).count()
+    const reminder_active = await Reminder.find({...params,isActive:true}).count()
      
     const today = JSON.stringify(new Date()).slice(1,11)+"T00:00:00.000+00:00"
     const tommorrow = JSON.stringify((new Date(moment().add(1, 'd')))).slice(1,11)+"T23:59:59.000+00:00";
@@ -70,11 +72,12 @@ exports.get = async(req,res)=>{
 
 
 
-    const today_case = await Case.find(today_params).populate('client')
-    const today_office_file = await OpinionFile.find(today_params).populate('client')
+    const today_case = await Case.find({...params,...today_params}).populate('client')
+    const today_office_file = await OpinionFile.find({...params,...today_params}).populate('client')
 
     const today_bills = await Bills.aggregate([
-      {$match:today_params1},
+      
+      {$match:{...params,...today_params1}},
       {
          $group:{
             _id:null,
@@ -85,7 +88,7 @@ exports.get = async(req,res)=>{
     ]).exec()
 
     const today_payment = await Payment.aggregate([
-      {$match:today_params1},
+      {$match:{...params,...today_params1}},
       {
          $group:{
             _id:null,
@@ -96,6 +99,7 @@ exports.get = async(req,res)=>{
     ]).exec()
 
     const today_reminder = await Reminder.aggregate([
+      {$match:params},
       {$match:{date: {$gte: new Date(JSON.stringify(new Date()).slice(1,11)), $lt: new Date(moment(JSON.stringify(new Date()).slice(1,11)).add(1, 'd'))}}},
       {
          $lookup:{

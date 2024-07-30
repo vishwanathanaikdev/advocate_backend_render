@@ -21,8 +21,10 @@ let upload1 = multer({ storage: storage}).single('file')
 
 
 router.get('/get/:id?',jwt.verifyToken, caseController.get)
+router.get('/get_admin/:id?',jwt.verifyToken, caseController.get_admin)
 router.post('/create', jwt.verifyToken,caseController.create)
 router.put('/update/:id',jwt.verifyToken, caseController.update)
+router.post('/update_mass',jwt.verifyToken, caseController.updateNextHearingDateMax)
 router.post('/upload_excel',[jwt.verifyToken],caseController.upload_excel(upload1,multer))
 router.delete('/delete/:id?',jwt.verifyToken, caseController.delete)
 router.delete('/delete_all',jwt.verifyToken, caseController.delete_all)

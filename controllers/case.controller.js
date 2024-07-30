@@ -5,6 +5,7 @@ const CaseAttachment = require("../models/case_attachment")
 const CaseType = require('../models/caseType')
 const ObjectId = require('mongoose').Types.ObjectId
 const moment = require("moment")
+const Activity = require('../models/activity')
 
 
 
@@ -19,6 +20,146 @@ exports.create = async(req,res)=>{
         
 exports.get = async(req,res)=>{
     let {page,type='',search='',from_date='',to_date='',step =1} = req.query
+    let {id} = req.params
+    let roles = req.body.user.roles
+    let user = req.body.user.id
+    let params = {},skip=0,limit=25,total=0,totalPages=0;
+
+    
+
+    if(id !== '' && id !== 'null' && id !== null && id !== undefined){
+        if(ObjectId.isValid(id)){
+            params = {_id:ObjectId(id)}
+        }
+    }else{
+        if(search !== ''){
+            params = {$and:[
+                {$or: [
+                    {office_file_no:{ $regex: search, '$options': 'i' }},
+                    {case_no: { $regex: search, '$options': 'i' } },
+                    {parties_name: { $regex: search, '$options': 'i' } },
+                    {advocate_for: { $regex: search, '$options': 'i' } },
+                    {court_hall: { $regex: search, '$options': 'i' } },
+                    {floor: { $regex: search, '$options': 'i' } },
+                ]},  
+            ]}
+        }
+    
+        if (from_date && to_date) {
+            params = { ...params, ...{ createdAt: { $gte: new Date(from_date), $lt: new Date(moment(to_date).add(1, 'd')) } } }
+        }
+
+        if(type !== ''){
+            const findData = await CaseType.findOne({name:type})
+            if(findData !== '' && findData !== 'null' && findData !== null && findData !== undefined){
+                params = {...params,case_type:findData._id}
+            }
+        }
+    }
+
+
+    if(step == 1){
+        params = {...params,status:'Pending'}
+    }else if(step == 2){
+        params = {...params,status:'In Progress'}
+    }else if(step == 3){
+        params = {...params,status:'Completed'}
+    }else if(step == 4){
+        params = {...params,status:'Hold'}
+    }
+
+    if(roles?.includes('admin')){
+
+    }else{
+       params ={...params,created_by:ObjectId(user)}
+    }
+
+    total = await CaseSchema.find(params).count()
+
+    totalPages = Math.ceil(total/limit)
+
+    
+
+    if(!page || page == 1){
+        skip = 0
+    }else{
+        skip = (page - 1) * limit
+    }
+
+    return await CaseSchema.aggregate([
+        {$match:params},
+        {
+            $lookup:{
+                from:"users",
+                localField:"created_by",
+                foreignField:"_id",
+                as:"created_by",
+            }
+        },
+        {
+           $unwind:{
+            path:"$created_by",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {
+            $lookup:{
+                from:"casestages",
+                localField:"stage",
+                foreignField:"_id",
+                as:"stage",
+            }
+        },
+        {
+           $unwind:{
+            path:"$stage",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {
+            $lookup:{
+                from:"casetypes",
+                localField:"case_type",
+                foreignField:"_id",
+                as:"case_type",
+            }
+        },
+        {
+           $unwind:{
+            path:"$case_type",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {
+            $lookup:{
+                from:"clientschemas",
+                localField:"client",
+                foreignField:"_id",
+                as:"client",
+            }
+        },
+        {
+           $unwind:{
+            path:"$client",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        { $sort: { createdAt: -1 } },
+        {$skip:skip},
+        {$limit:limit}
+    ]).exec((err,datas)=>{
+        err && res.status(403).send({status:false,err:err})
+        datas && res.status(200).send({status:true,datas:datas,pagination:{total,totalPages,limit}})
+    })
+
+
+
+    
+
+}
+
+exports.get_admin = async(req,res)=>{
+    let {page,type='',search='',from_date='',to_date='',case_hearing_date='',step=''} = req.query
     let {id} = req.params
     let params = {},skip=0,limit=25,total=0,totalPages=0;
 
@@ -41,8 +182,10 @@ exports.get = async(req,res)=>{
             ]},  
         ]}
     
-        if (from_date && to_date) {
+        if (from_date && to_date && !case_hearing_date) {
             params = { ...params, ...{ createdAt: { $gte: new Date(from_date), $lt: new Date(moment(to_date).add(1, 'd')) } } }
+        }else if(case_hearing_date){
+            params = { ...params, ...{ next_hearing_date: new Date(case_hearing_date)} }
         }
 
         if(type !== ''){
@@ -390,6 +533,46 @@ exports.fileUpload = (req,res)=>{
     return res.status(200).send({status:true,data:req.file.key})
 } 
 
+exports.updateNextHearingDateMax = async (req,res)=>{
+    let datas = [...req.body.selected]
+    let date = req.body.next_hearing_date
+    
+    async function updatemass(){
+        let completeData = new Promise(async(resolve, reject) => {
+        
+            if(datas.length === 0){
+                resolve()
+            }else{
+                datas.forEach(async(d,i)=>{
+                    let caseData = await CaseSchema.findById(d)
+                    if(caseData !== null){
+                        await CaseSchema.findByIdAndUpdate(d,{next_hearing_date:date})
+                        let sendData = {
+                            created_by:req.body.user.id,
+                            case:d,
+                            client:caseData.client,
+                            stage:caseData.stage,
+                            remarks:"Mass Updated on Next Hearing Date",
+                            next_hearing_date:date,
+                            type:'case'
+                        }
+                        await Activity.create(sendData)
+                    }
+
+                    if(i == (datas.length-1)){
+                        resolve()
+                    }
+                })
+            }
+        })
+
+        return completeData
+    }
+
+    await updatemass().then((data)=>{
+        res.status(200).send({status:true,data:"Updated Successfully"})
+    })
+}
 
 exports.upload_case_attachment_file = async(req,res)=>{
     let body = {...req.body}
