@@ -6,12 +6,16 @@ const CaseType = require('../models/caseType')
 const ObjectId = require('mongoose').Types.ObjectId
 const moment = require("moment")
 const Activity = require('../models/activity')
+const excelJS = require("exceljs");
 
 
 
 exports.create = async(req,res)=>{
     let body = {...req.body}
     body['created_by'] = req.body.user.id
+    if(!['',null,undefined,'null','undefined']?.includes(body.next_hearing_date)){
+        body['previous_hearing_date'] = body.next_hearing_date
+    }
     await CaseSchema.create(body,(err,data)=>{
           err && res.status(403).send({status:false,err:err})
           data && res.status(201).send({status:true,data:'Created Successfully'})
@@ -58,6 +62,7 @@ exports.get = async(req,res)=>{
     }
 
 
+if(id === ''){
     if(step == 1){
         params = {...params,status:'Pending'}
     }else if(step == 2){
@@ -67,6 +72,7 @@ exports.get = async(req,res)=>{
     }else if(step == 4){
         params = {...params,status:'Hold'}
     }
+}
 
     if(roles?.includes('admin')){
 
@@ -291,6 +297,14 @@ exports.get_admin = async(req,res)=>{
 }
 
 exports.update = async(req,res)=>{
+
+    let body = [...req.body] 
+    let findCase =  await CaseSchema.findById(req.params.id)
+
+    if(!['',null,undefined,'null','undefined']?.includes(findCase.next_hearing_date)){
+        body['previous_hearing_date'] = findCase?.next_hearing_date
+    }
+
     await CaseSchema.findByIdAndUpdate(req.params.id,req.body,(err,data)=>{
         err && res.status(403).send({status:false,err:err})
         data && res.status(200).send({status:true,data:'Updated Successfully'})
@@ -433,6 +447,352 @@ exports.filter = async (req,res)=>{
         data && res.status(200).send({status:true,datas:data,pagination:{total,totalPages,limit}})
     })
 }
+
+
+exports.filter_date = async (req,res)=>{
+    const {search='',page=1,hearing_date='',type=''} = req.query 
+
+    let params = {}, skip = 0,  totalPages = 1 , total = 0, limit = 25
+    
+    // params = {$and:[
+    //     {$or: [
+    //         {office_file_no:{ $regex: search, '$options': 'i' }},
+    //         {case_no: { $regex: search, '$options': 'i' } },
+    //         {parties_name: { $regex: search, '$options': 'i' } },
+    //         {advocate_for: { $regex: search, '$options': 'i' } },
+    //         {court_hall: { $regex: search, '$options': 'i' } },
+    //         {floor: { $regex: search, '$options': 'i' } },
+    //     ]},  
+    // ]}
+
+    // if (from_date && to_date) {
+    //     params = { ...params, ...{ createdAt: { $gte: new Date(from_date), $lt: new Date(moment(to_date).add(1, 'd')) } } }
+    // }
+
+
+    console.log("hearing_date",hearing_date)
+
+
+    if(!['',null,undefined,'null','undefined']?.includes(hearing_date)){
+       let date = new Date(hearing_date)
+    //    console.log("date",date)
+        params = {...params,next_hearing_date:date}
+    }
+
+    // if(['',null,undefined,'null','undefined']?.includes(type)){
+    //     const findData = await CaseType.findOne({name:type})
+    //     if(findData !== '' && findData !== 'null' && findData !== null && findData !== undefined){
+    //         params = {case_type:findData._id}
+    //     }
+    // }
+
+    total = await CaseSchema.find(params).count()
+    totalPages = Math.ceil(total/limit)
+
+
+   console.log("params",params)
+
+    if(!page || page == 1){
+        skip = 0
+    }else{
+        skip = (page - 1) * limit
+    }
+
+
+    return await CaseSchema.aggregate([
+        {
+            $match:params
+        },
+        {
+            $lookup:{
+                from:"users",
+                localField:"created_by",
+                foreignField:"_id",
+                as:"created_by",
+            }
+        },
+        {
+           $unwind:{
+            path:"$created_by",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {
+            $lookup:{
+                from:"casestages",
+                localField:"stage",
+                foreignField:"_id",
+                as:"stage",
+            }
+        },
+        {
+           $unwind:{
+            path:"$stage",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {
+            $lookup:{
+                from:"casetypes",
+                localField:"case_type",
+                foreignField:"_id",
+                as:"case_type",
+            }
+        },
+        {
+           $unwind:{
+            path:"$case_type",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {
+            $lookup:{
+                from:"clientschemas",
+                localField:"client",
+                foreignField:"_id",
+                as:"client",
+            }
+        },
+        {
+           $unwind:{
+            path:"$client",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {
+            $lookup:{
+                from:"users",
+                localField:"created_by",
+                foreignField:"_id",
+                as:"created_by",
+            }
+        },
+        {
+           $unwind:{
+            path:"$created_by",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {$skip:skip},
+        {$limit:limit}
+    ])
+    .exec((err,data)=>{
+        err && res.status(403).send({status:false,err:err})
+        data && res.status(200).send({status:true,datas:data,pagination:{total,totalPages,limit}})
+    })
+}
+
+
+exports.filter_date_excel = async (req,res)=>{
+
+   const workbook = new excelJS.Workbook();  // Create a new workbook
+   const worksheet = workbook.addWorksheet("Today Work",{
+    pageSetup:{fitToPage: true, fitToHeight: 5, fitToWidth: 7,horizontalCentered:true,verticalCentered:true}
+   }); // New Worksheet
+   const path = "public/today_work";
+
+
+
+    const {search='',page=1,hearing_date='',type=''} = req.query 
+
+    let params = {}, skip = 0,  totalPages = 1 , total = 0, limit = 25
+    
+    // params = {$and:[
+    //     {$or: [
+    //         {office_file_no:{ $regex: search, '$options': 'i' }},
+    //         {case_no: { $regex: search, '$options': 'i' } },
+    //         {parties_name: { $regex: search, '$options': 'i' } },
+    //         {advocate_for: { $regex: search, '$options': 'i' } },
+    //         {court_hall: { $regex: search, '$options': 'i' } },
+    //         {floor: { $regex: search, '$options': 'i' } },
+    //     ]},  
+    // ]}
+
+    // if (from_date && to_date) {
+    //     params = { ...params, ...{ createdAt: { $gte: new Date(from_date), $lt: new Date(moment(to_date).add(1, 'd')) } } }
+    // }
+
+
+
+
+    if(!['',null,undefined,'null','undefined']?.includes(hearing_date)){
+       let date = new Date(hearing_date)
+    //    console.log("date",date)
+        params = {...params,next_hearing_date:date}
+    }
+
+    // if(['',null,undefined,'null','undefined']?.includes(type)){
+    //     const findData = await CaseType.findOne({name:type})
+    //     if(findData !== '' && findData !== 'null' && findData !== null && findData !== undefined){
+    //         params = {case_type:findData._id}
+    //     }
+    // }
+
+    total = await CaseSchema.find(params).count()
+    totalPages = Math.ceil(total/limit)
+
+
+   console.log("params",params)
+
+    if(!page || page == 1){
+        skip = 0
+    }else{
+        skip = (page - 1) * limit
+    }
+
+
+    return await CaseSchema.aggregate([
+        {
+            $match:params
+        },
+        {
+            $lookup:{
+                from:"users",
+                localField:"created_by",
+                foreignField:"_id",
+                as:"created_by",
+            }
+        },
+        {
+           $unwind:{
+            path:"$created_by",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {
+            $lookup:{
+                from:"casestages",
+                localField:"stage",
+                foreignField:"_id",
+                as:"stage",
+            }
+        },
+        {
+           $unwind:{
+            path:"$stage",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {
+            $lookup:{
+                from:"casetypes",
+                localField:"case_type",
+                foreignField:"_id",
+                as:"case_type",
+            }
+        },
+        {
+           $unwind:{
+            path:"$case_type",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {
+            $lookup:{
+                from:"clientschemas",
+                localField:"client",
+                foreignField:"_id",
+                as:"client",
+            }
+        },
+        {
+           $unwind:{
+            path:"$client",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {
+            $lookup:{
+                from:"users",
+                localField:"created_by",
+                foreignField:"_id",
+                as:"created_by",
+            }
+        },
+        {
+           $unwind:{
+            path:"$created_by",
+            preserveNullAndEmptyArrays:true
+           }
+        },
+        {$skip:skip},
+        {$limit:limit},
+        {
+            $project:{
+                    "court_hall":'$court_hall',
+                    "case_no":'$case_no' ,
+                    "stage":'$stage.name',
+                    "next_hearing_date":'$next_hearing_date',
+                    "previous_hearing_date":'$previous_hearing_date',
+                   
+            }
+        }
+    ])
+    .exec(async(err,datas)=>{
+
+        worksheet.columns = [
+            { header: "Sl No.", key: "s_no", width: 10 }, 
+            { header: "Previous Hearing Date", key: "previous_hearing_date", width: 20 },
+            { header: "Court Hall", key: "court_hall", width: 30 },
+            { header: "Particulars (Case No) ", key: "case_no", width: 20 },
+            { header: "Stage", key: "stage", width: 20 },
+            { header: "Next Hearing Date", key: "next_hearing_date", width: 20 },
+            { header: "Date ", key: "", width: 15 },
+            { header: "Remarks", key: "", width: 40 },
+          
+        ];
+
+        let counter = 1
+        datas.forEach((user) => {
+            user.s_no = counter;
+            worksheet.addRow(user); // Add data in worksheet
+            counter++;
+          });
+    
+          worksheet.eachRow(function (row, rowNumber) {
+    
+            row.eachCell((cell, colNumber) => {
+                if (rowNumber == 1) {
+                    // First set the background of header row
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'e6e6e6' }
+                    }
+                }
+                // Set border of each cell 
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+            })
+            //Commit the changed row to the stream
+            row.commit();
+        });
+
+        try {
+            const data = await workbook.xlsx.writeFile(`${path}/today_work.xlsx`)
+             .then(() => {
+               res.send({
+                 status: "success",
+                 message: "file successfully downloaded",
+                 path: `${path}/today_work.xlsx`,
+                });
+             });
+          } catch (err) {
+              res.send({
+              status: "error",
+              message: "Something went wrong",
+            });
+            }
+    
+    
+       })
+      
+}
+
 
 exports.upload_excel =  (upload,multer) =>{
     return (req, res) => {

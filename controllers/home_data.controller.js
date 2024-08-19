@@ -71,7 +71,6 @@ exports.get = async(req,res)=>{
     let today_params1 =  {createdAt: {$gte: new Date(JSON.stringify(new Date()).slice(1,11)), $lt: new Date(moment(JSON.stringify(new Date()).slice(1,11)).add(1, 'd'))}}
 
 
-
     const today_case = await Case.find({...params,...today_params}).populate('client')
     const today_office_file = await OpinionFile.find({...params,...today_params}).populate('client')
 

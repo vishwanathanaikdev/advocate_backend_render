@@ -29,6 +29,8 @@ router.post('/upload_excel',[jwt.verifyToken],caseController.upload_excel(upload
 router.delete('/delete/:id?',jwt.verifyToken, caseController.delete)
 router.delete('/delete_all',jwt.verifyToken, caseController.delete_all)
 router.get('/filter',jwt.verifyToken, caseController.filter)
+router.get('/filter_date',jwt.verifyToken, caseController.filter_date)
+router.get('/filter_date_excel',jwt.verifyToken, caseController.filter_date_excel)
 router.post('/upload_file',upload_case_docs.single('file'),caseController.fileUpload)
 router.post('/upload_case_attachment_file',jwt.verifyToken,upload_case_docs.single('file'),caseController.upload_case_attachment_file)
 

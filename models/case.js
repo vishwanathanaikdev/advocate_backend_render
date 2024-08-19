@@ -62,6 +62,10 @@ const caseSchema = new mongoose.Schema({
         type:Date,
         required:false
     },
+    previous_hearing_date:{
+        type:Date,
+        required:false
+    },
 },{
     timestamps: true
 })
