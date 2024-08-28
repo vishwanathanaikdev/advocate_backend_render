@@ -20,7 +20,7 @@ const opinion_file_attachment = require('./routes/opinion_file_attachment.router
 const case_attachment = require('./routes/case_attachment.router')
 const bills = require('./routes/bills.router')
 const payment = require('./routes/payment.router')
-
+const folder_router = require('./routes/folder.schema.router')
 
 const app = express()
 
@@ -47,6 +47,7 @@ app.use('/api/opinion_file_attachment', opinion_file_attachment)
 app.use('/api/case_attachment', case_attachment)
 app.use('/api/home_data', homeData)
 app.use('/api/activity', activity)
+app.use('/api/folder',folder_router)
 
 
 app.use((req, res, next) => {
