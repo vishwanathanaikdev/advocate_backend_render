@@ -15,12 +15,31 @@ const folderSchema = new mongoose.Schema({
         default:'',
         required: false
     },
-    subFolders:[
-        {
+    subFolders:{
             type:mongoose.Schema.Types.ObjectId,
-            ref:'folderSchema'
-        }
-    ]
+            ref:'folderSchema',
+            required:false
+    },
+    type:{
+        type: String,
+        enum:['img','xlsx','pdf','folder','zip','video','docs','']
+    },
+    important:{
+        type:Boolean,
+        default:false
+    },
+    deleted:{
+        type:Boolean,
+        default:false
+    },
+    deleted_user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User'
+    },
+    fileSize:{
+        type: String,
+        default:''
+    },
 },{
     timestamps: true
 })

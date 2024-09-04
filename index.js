@@ -21,6 +21,7 @@ const case_attachment = require('./routes/case_attachment.router')
 const bills = require('./routes/bills.router')
 const payment = require('./routes/payment.router')
 const folder_router = require('./routes/folder.schema.router')
+const folder_activity_router = require('./routes/folder.activity.schema.router')
 
 const app = express()
 
@@ -48,6 +49,7 @@ app.use('/api/case_attachment', case_attachment)
 app.use('/api/home_data', homeData)
 app.use('/api/activity', activity)
 app.use('/api/folder',folder_router)
+app.use('/api/folder_activity',folder_activity_router)
 
 
 app.use((req, res, next) => {

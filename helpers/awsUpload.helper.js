@@ -44,4 +44,5 @@ const upload_files = multer({
   }),
 });
 
+
 module.exports = {upload_case_docs,upload_employee_docs,upload_files};
