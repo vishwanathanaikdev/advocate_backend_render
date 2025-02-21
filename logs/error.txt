@@ -583,3 +583,9 @@ Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 
 2024-07-25T04:17:07.291Z : Database Connection:- MongooseServerSelectionError
 2024-07-26T08:39:02.538Z : Database Connection:- MongooseServerSelectionError
 2024-07-29T10:23:04.733Z : Email:- Error: No recipients defined
+2024-10-08T11:12:26.349Z : Database Connection:- MongooseServerSelectionError
+2024-10-08T11:14:28.026Z : Database Connection:- MongooseServerSelectionError
+2024-10-08T12:03:39.160Z : Database Connection:- MongooseServerSelectionError
+2024-10-08T12:11:28.438Z : Database Connection:- MongooseServerSelectionError
+2024-11-07T01:35:38.381Z : Email:- Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-2e9a5f8f5d3sm247625a91.27 - gsmtp

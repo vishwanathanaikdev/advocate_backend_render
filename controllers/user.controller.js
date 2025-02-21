@@ -494,7 +494,7 @@ exports.userLogin = (req, res) => {
                 }
             }
             else {
-                res.status(401).json({'status': false, 'errors': 'Invalid FCPL ID'})
+                res.status(401).json({'status': false, 'errors': 'Invalid User Info'})
             }
         }
     })

@@ -30,6 +30,7 @@ exports.get = async(req,res)=>{
     let params = {},skip=0,limit=25,total=0,totalPages=0;
 
     
+    console.log("id here",id)
 
     if(id !== '' && id !== 'null' && id !== null && id !== undefined){
         if(ObjectId.isValid(id)){
@@ -62,7 +63,7 @@ exports.get = async(req,res)=>{
     }
 
 
-if(id === ''){
+if(id === undefined){
     if(step == 1){
         params = {...params,status:'Pending'}
     }else if(step == 2){
@@ -74,6 +75,8 @@ if(id === ''){
     }
 }
 
+
+
     if(roles?.includes('admin')){
 
     }else{
@@ -84,7 +87,7 @@ if(id === ''){
 
     totalPages = Math.ceil(total/limit)
 
-    
+    console.log("params",params)
 
     if(!page || page == 1){
         skip = 0
@@ -298,7 +301,7 @@ exports.get_admin = async(req,res)=>{
 
 exports.update = async(req,res)=>{
 
-    let body = [...req.body] 
+    let body = {...req.body} 
     let findCase =  await CaseSchema.findById(req.params.id)
 
     if(!['',null,undefined,'null','undefined']?.includes(findCase.next_hearing_date)){
