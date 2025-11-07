@@ -589,3 +589,9 @@ Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 
 2024-10-08T12:11:28.438Z : Database Connection:- MongooseServerSelectionError
 2024-11-07T01:35:38.381Z : Email:- Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
 535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-2e9a5f8f5d3sm247625a91.27 - gsmtp
+2025-11-02T02:20:33.867Z : Email:- Error: getaddrinfo ENOTFOUND smtp.gmail.com
+2025-11-03T01:52:56.460Z : Email:- Error: getaddrinfo ENOTFOUND smtp.gmail.com
+2025-11-04T04:10:45.242Z : Email:- Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-34159fc0f54sm2759730a91.2 - gsmtp
+2025-11-07T02:15:05.423Z : Email:- Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-7b0cc17ad4asm1000390b3a.37 - gsmtp

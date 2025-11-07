@@ -10,17 +10,37 @@ const excelJS = require("exceljs");
 
 
 
-exports.create = async(req,res)=>{
-    let body = {...req.body}
-    body['created_by'] = req.body.user.id
-    if(!['',null,undefined,'null','undefined']?.includes(body.next_hearing_date)){
-        body['previous_hearing_date'] = body.next_hearing_date
+// exports.create = async(req,res)=>{
+//     let body = {...req.body}
+//     body['created_by'] = req.body.user.id
+//     if(!['',null,undefined,'null','undefined']?.includes(body.next_hearing_date)){
+//         body['previous_hearing_date'] = body.next_hearing_date
+//     }
+//     await CaseSchema.create(body,(err,data)=>{
+//           err && res.status(403).send({status:false,err:err})
+//           data && res.status(201).send({status:true,data:'Created Successfully'})
+//     })
+// }
+
+
+exports.create = async (req, res) => {
+    let body = { ...req.body };
+    body['created_by'] = req.body.user.id;
+  
+    if (!['', null, undefined, 'null', 'undefined'].includes(body.next_hearing_date)) {
+      body['previous_hearing_date'] = body.next_hearing_date;
     }
-    await CaseSchema.create(body,(err,data)=>{
-          err && res.status(403).send({status:false,err:err})
-          data && res.status(201).send({status:true,data:'Created Successfully'})
-    })
-}
+  
+    // 🛡️ Prevent invalid ObjectIds
+    if (!body.stage || body.stage === '') delete body.stage;
+    if (!body.case_type || body.case_type === '') delete body.case_type;
+  
+    await CaseSchema.create(body, (err, data) => {
+      if (err) return res.status(403).send({ status: false, err });
+      res.status(201).send({ status: true, data: 'Created Successfully' });
+    });
+  };
+  
         
 exports.get = async(req,res)=>{
     let {page,type='',search='',from_date='',to_date='',step =1} = req.query
@@ -892,9 +912,35 @@ exports.upload_excel =  (upload,multer) =>{
     }   
 }
 
-exports.fileUpload = (req,res)=>{
-    return res.status(200).send({status:true,data:req.file.key})
-} 
+// exports.fileUpload = (req,res)=>{
+//     return res.status(200).send({status:true,data:req.file.key})
+// } 
+
+
+exports.fileUpload = (req, res) => {
+    try {
+      console.log('📥 File upload API hit');
+      if (!req.file) {
+        console.error('❌ No file found in request');
+        return res.status(400).send({ status: false, message: 'No file uploaded!' });
+      }
+  
+      console.log('✅ File uploaded to S3:', req.file.location);
+  
+      return res.status(200).send({
+        status: true,
+        data: req.file.location, // ✅ Return full public S3 URL
+      });
+    } catch (err) {
+      console.error('❌ Upload error:', err);
+      return res.status(500).send({
+        status: false,
+        message: 'File upload failed',
+        error: err.message,
+      });
+    }
+  };
+  
 
 exports.updateNextHearingDateMax = async (req,res)=>{
     let datas = [...req.body.selected]
